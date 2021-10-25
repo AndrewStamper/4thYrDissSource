@@ -1,2 +1,2 @@
-def bounding_box():
+def load_image():
     return 33
