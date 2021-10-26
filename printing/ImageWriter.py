@@ -7,19 +7,19 @@ OUTPUT_FILE = "../output/"
 def write_image(filename, image_3d):
     # Function to read the write numpy array of rows*columns*pixels to a png
     file = open(OUTPUT_FILE + filename, 'wb')
-    pilImage = Image.fromarray(image_3d)
-    pilImage.save(file)
+    pil_image = Image.fromarray(image_3d)
+    pil_image.save(file)
     file.close()
 
 
-def print_points_png(point1, point2, point3, point4, image_3d, size):
+def print_points_png(filename, point1, point2, point3, point4, image_3d, size):
     output_image = np.zeros(image_3d.shape, dtype=np.uint8)
     print_point_for_png(output_image, point1, 0, size)
     print_point_for_png(output_image, point2, 1, size)
     print_point_for_png(output_image, point3, 2, size)
     print_point_for_png(output_image, point4, 0, size)
     print_point_for_png(output_image, point4, 1, size)
-    write_image("points.png", output_image)
+    write_image(filename, output_image)
 
 
 def print_point_for_png(output_image, point, colour, size):
