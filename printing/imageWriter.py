@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 
-OUTPUT_FILE = "output/"
+OUTPUT_FILE = "../output/"
 
 
 def write_image(filename, image_3d):
