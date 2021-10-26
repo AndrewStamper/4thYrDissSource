@@ -1,16 +1,5 @@
-import png
+from PIL import Image
 import numpy as np
-
-
-def read_png():
-    # Function to read the Annotations stored in the png file and return these as a numpy array of rows*columns*pixels
-    r = png.Reader(filename="../AlderHayUltrasounds/A001L_a.png")
-    # print(r.read())
-    (width, height, rows_iter, info) = r.asDirect()
-    image_2d = np.vstack(map(np.uint8, rows_iter))
-    image_3d = np.reshape(image_2d, (height, width, 4))  # image is an array of rows, each row is an array of pixels, each pixel is an array of four values: RGBA
-    # print(image_3d.shape)
-    return image_3d
 
 
 def get_green(image_3d):
