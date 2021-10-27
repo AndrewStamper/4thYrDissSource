@@ -33,5 +33,3 @@ write_image("5_Bounded_scan.png", bounded_image_3d_scan)
 plot_as_3d('6_3D_surface_of_scan.html', brightness_of_pixel(image_3d_scan))
 
 print("complete")
-
-

@@ -1,1 +1,1 @@
-This is my work annotating Hip Ultrasounds for my 4th year Computer Science project at the Computer Science Department, The University of Oxford.
+This is my work annotating Hip Ultrasounds for my 4th year computer science project at the Computer Science Department, The University of Oxford.

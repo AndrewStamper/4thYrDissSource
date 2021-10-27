@@ -11,10 +11,8 @@ def plot_as_3d(filename, image_2d_scan):
 
     x = np.repeat([np.arange(width)], height, axis=0)
     y = np.repeat(np.flip(np.arange(height)).reshape(-1, 1), width, axis=1)
-    z = image_2d_scan
 
     fig = go.Figure()
     fig.add_trace(go.Surface(z=image_2d_scan, x=x, y=y))
     fig.update_layout(scene=dict(aspectratio=dict(x=2, y=2, z=0.5), xaxis=dict(range=[0, width],), yaxis=dict(range=[0, height])))
     go_offline.plot(fig, filename=OUTPUT_FILE + filename, validate=True, auto_open=False)
-
