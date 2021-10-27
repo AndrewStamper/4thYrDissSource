@@ -26,7 +26,7 @@ brightness = 70
 bounded_image_3d_scan = bound_values(restricted_image_3d_scan, brightness)
 write_image("4_Bounded_scan.png", bounded_image_3d_scan)
 
-plot_as_3d('3d_terrain.html', brightness_of_pixel(image_3d_scan))
+plot_as_3d('5_3D_surface_of_scan', brightness_of_pixel(image_3d_scan))
 
 print("complete")
 
