@@ -37,3 +37,33 @@ def get_blue(image_3d):
     point4 = np.unravel_index(np.argmax(blue_lower_left_most, axis=None), blue_layer.shape)
 
     return point3, point4
+
+
+def print_points_png(point1, point2, point3, point4, image_3d, size):
+    output_image = np.zeros(image_3d.shape, dtype=np.uint8)
+    print_point_for_png(output_image, point1, 0, size)
+    print_point_for_png(output_image, point2, 1, size)
+    print_point_for_png(output_image, point3, 2, size)
+    print_point_for_png(output_image, point4, 0, size)
+    print_point_for_png(output_image, point4, 1, size)
+    return output_image
+
+
+def print_point_for_png(output_image, point, colour, size):
+    for x in range(-size, size):
+        for y in range(-size, size):
+            if(x * x) + (y * y) <= size*size:
+                output_image[point[0] + x, point[1] + y, colour] = 255
+                output_image[point[0] + x, point[1] + y, 3] = 255
+
+
+def add_points(image_3d_scan, image_3d_points):
+    width = image_3d_points.shape[1]
+    height = image_3d_points.shape[0]
+
+    # mask = np.repeat(np.reshape((1 - (image_3d_points[:, :, 3]) / 255), (height, width, 1)), 3, axis=2)
+
+    mask = np.repeat(np.reshape((image_3d_points[:, :, 3] == 0), (height, width, 1)), 3, axis=2)
+
+    image_3d_scan_with_points = np.add(np.multiply(image_3d_scan, mask), image_3d_points[:, :, 0:3])
+    return image_3d_scan_with_points
