@@ -1,3 +1,6 @@
+# LEGACY image Loader
+
+
 from PIL import Image
 
 OUTPUT_FILE = "../output/"
@@ -9,7 +12,3 @@ def write_image(filename, image_3d):
     pil_image = Image.fromarray(image_3d)
     pil_image.save(file)
     file.close()
-
-
-def write_jpg():
-    print("test")
