@@ -1,5 +1,7 @@
-from ImageClasses.AnnotationsPoints import *
+from ImageClasses.AnnotationsPoints import AnnotationPointScan
+from ImageClasses.NumpyImage import NumpyImage
 from Constants import *
+import numpy as np
 
 
 class AnnotationLineScan(NumpyImage):

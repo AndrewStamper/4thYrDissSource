@@ -1,4 +1,4 @@
-from ImageClasses.NumpyImage import *
+from ImageClasses.NumpyImage import NumpyImage
 from Constants import *
 import numpy as np
 import plotly.offline as go_offline
@@ -55,7 +55,7 @@ class UltrasoundScan(NumpyImage):
 
         fig = go.Figure()
         fig.add_trace(go.Surface(z=self.image_3d, x=x, y=y))
-        fig.update_layout(scene=dict(aspectratio=dict(x=2, y=2, z=0.5), xaxis=dict(range=[0, self.get_width()],), yaxis=dict(range=[0, self.get_height()])))
+        fig.update_layout(scene=dict(aspectratio=dict(x=self.get_width()/100, y=self.get_height()/100, z=125/100), xaxis=dict(range=[0, self.get_width()],), yaxis=dict(range=[0, self.get_height()])))
         go_offline.plot(fig, filename=OUTPUT_FILE + filename, validate=True, auto_open=False)
 
     # use a bounding value to segment
@@ -72,3 +72,19 @@ class UltrasoundScan(NumpyImage):
         mask = np.repeat(np.reshape((self.annotations_points.image_3d[:, :, 3] == 0), (self.get_height(), self.get_width(), 1)), 3, axis=2)
         image_3d_scan_with_points = np.add(np.multiply(scan_image, mask), self.annotations_points.image_3d[:, :, 0:3])
         return NumpyImage(image_3d_scan_with_points)
+
+    def add_progression(self, other):
+        if other.get_height() != self.get_height():
+            raise ValueError('Cannot add image to progression as it has incompatible height dimension')
+        self.image_3d = np.append(self.image_3d, other.image_3d, axis=1)
+
+    def gauss_filter(self, size_x, size_y):
+        kernel_x = np.array([1.0, 2.0, 1.0])
+        kernel_y = np.array([1.0, 2.0, 1.0])
+
+        normalised_kernel_x = kernel_x/kernel_x.sum
+        normalised_kernel_y = kernel_y/kernel_y.sum
+
+        filtered_once = np.apply_along_axis(lambda x: np.convolve(x, normalised_kernel_x, mode='same'), 0, self.image_3d)
+        filtered_twice = np.apply_along_axis(lambda x: np.convolve(x, normalised_kernel_y, mode='same'), 1, filtered_once).astype(dtype=np.uint8)
+        return UltrasoundScan(filtered_twice)
