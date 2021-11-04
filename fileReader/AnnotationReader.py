@@ -1,3 +1,5 @@
+# legacy incorporated into ImageClass:AnnotationsLine
+
 import numpy as np
 
 
