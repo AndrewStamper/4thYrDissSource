@@ -1,3 +1,5 @@
+# legacy - all have been implemented as part of the ImageClass
+
 import numpy as np
 
 RGB_TO_BRIGHTNESS = [0.21, 0.72, 0.07]
