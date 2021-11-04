@@ -21,13 +21,13 @@ class AnnotationPointScan(NumpyImage):
         return AnnotationPointScan(numpy_image.image_3d, new_points)
 
     def illium_l_point(self):
-        return self.points[0]  # TODO setup as right point
+        return self.points[3]
 
     def illium_r_point(self):
-        return self.points[0]  # TODO setup as right point
+        return self.points[2]
 
     def bony_roof_b_point(self):
-        return self.points[0]  # TODO setup as right point
+        return self.points[1]
 
     def bony_roof_t_point(self):
-        return self.points[0]  # TODO setup as right point
+        return self.points[0]

@@ -19,7 +19,6 @@ class AnnotationLineScan(NumpyImage):
         if self.ultrasound_scan is not None:
             self.ultrasound_scan.annotations_lines = self
 
-
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
         numpy_image = super().restrict_to_box(corner_top_left, corner_bottom_right)
