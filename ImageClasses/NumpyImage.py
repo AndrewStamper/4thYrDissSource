@@ -11,13 +11,18 @@ import numpy as np
 class NumpyImage:
     # Wrapper around each image which is held as a 3d numpy array.
 
-    # load it
+    # Function to read the Annotations stored in the png file and return these as a numpy array of rows*columns*pixels
     @staticmethod
     def read_image(filename):
-        # Function to read the Annotations stored in the png file and return these as a numpy array of rows*columns*pixels
         img = Image.open(IMAGE_FILE + filename)
-        image_3d = np.asarray(img)
+        image_3d = np.asarray(img, dtype=np.uint8)
         return NumpyImage(image_3d)
+
+    @staticmethod
+    def find_box(points):
+        corner_top_left = (np.amin(points[:, 0]), np.amin(points[:, 1]))
+        corner_bottom_right = (np.amax(points[:, 0]), np.amax(points[:, 1]))
+        return corner_top_left, corner_bottom_right
 
     # initialisation function
     def __init__(self, rows):
@@ -56,6 +61,3 @@ class NumpyImage:
     # print
     def to_string(self):
         return self.image_3d
-
-
-
