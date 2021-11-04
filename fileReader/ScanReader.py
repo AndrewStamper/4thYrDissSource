@@ -1,4 +1,4 @@
-# LEGACY image loader
+# LEGACY image loader  incorporated into ImageClass:NumpyImage
 
 
 from PIL import Image

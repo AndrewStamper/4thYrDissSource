@@ -10,17 +10,20 @@ def find_box(point1, point2, point3, point4):
 
 
 def restrict_to_box(image_3d_scan, corner_top_left, corner_bottom_right):
+    # legacy incorporated into ImageClass:NumpyImage
     restricted_image_3d_scan = image_3d_scan[corner_top_left[0]:corner_bottom_right[0], corner_top_left[1]:corner_bottom_right[1]]
     return restricted_image_3d_scan
 
 
 def brightness_of_pixel(image_3d_scan):
+    # legacy incorporated into ImageClass:UltrasoundScan
     brightness_matrix = np.repeat([np.repeat([RGB_TO_BRIGHTNESS], image_3d_scan.shape[1], axis=0)], image_3d_scan.shape[0], axis=0)
     brightness_image_3d_scan = np.multiply(brightness_matrix, image_3d_scan)
     return np.sum(brightness_image_3d_scan, axis=2)
 
 
 def bound_values(image_3d_scan, brightness):
+    # legacy incorporated into ImageClass:UltrasoundScan
     brightness_image_2d_scan = brightness_of_pixel(image_3d_scan)
     bounded_section = np.greater_equal(brightness_image_2d_scan, np.full(brightness_image_2d_scan.shape, brightness)).astype('uint8')
     bounded_image_3d_scan = np.repeat(np.reshape(bounded_section * 255, (bounded_section.shape[0], bounded_section.shape[1], 1)), 3, axis=2)

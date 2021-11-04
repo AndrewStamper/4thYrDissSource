@@ -1,4 +1,4 @@
-# LEGACY surface printing code
+# LEGACY surface printing code incorporated into ImageClass:UltrasoundScan
 
 
 import numpy as np
