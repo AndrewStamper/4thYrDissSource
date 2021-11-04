@@ -1,4 +1,4 @@
-from NumpyImage import *
+from ImageClasses.NumpyImage import *
 from Constants import *
 import numpy as np
 import plotly.offline as go_offline
@@ -13,32 +13,34 @@ class UltrasoundScan(NumpyImage):
         # Convert each pixel into a greyscale value
         brightness_matrix = np.repeat([np.repeat([RGB_TO_BRIGHTNESS], numpy_image.get_width(), axis=0)], numpy_image.get_height(), axis=0)
         brightness_image_3d_scan = np.multiply(brightness_matrix, numpy_image.image_3d)
-        image_3d = np.sum(brightness_image_3d_scan, axis=2)
+        image_3d = np.sum(brightness_image_3d_scan, axis=2).astype(dtype=np.uint8)
         return UltrasoundScan(image_3d)
 
     @staticmethod
     # read from a file
     def read_image(filename):
-        numpy_image = super().read_image(filename)
+        numpy_image = NumpyImage.read_image(filename)
         return UltrasoundScan.convert_from_numpy_image(numpy_image)
 
     # initialise the structure
-    def __init__(self, rows):
+    def __init__(self, rows, annotations_lines=None, annotations_points=None):
         super().__init__(rows)
-        self.annotations = None
+        self.annotations_lines = annotations_lines
+        self.annotations_points = annotations_points
 
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
         numpy_image = super().restrict_to_box(corner_top_left, corner_bottom_right)
         return UltrasoundScan(numpy_image.image_3d)
 
-    # set the annotations
-    def set_annotations(self, pair):
-        self.annotations = pair
+    # write back to a png
+    def write_image(self, filename):
+        numpy_image = NumpyImage(self._convert_to_rgb())
+        numpy_image.write_image(filename)
 
-    # retrieve the annotations
-    def get_annotations(self):
-        return self.annotations
+    # convert to RGB
+    def _convert_to_rgb(self):
+        return np.repeat(self.image_3d.reshape((self.get_height(), self.get_width(), 1)), 3, axis=2)
 
     # plot in 3d
     def plot_as_3d(self, filename):
@@ -53,5 +55,14 @@ class UltrasoundScan(NumpyImage):
     # use a bounding value to segment
     def bound_values(self, brightness):
         bounded_section = np.greater_equal(self.image_3d, np.full(self.get_shape(), brightness)).astype('uint8')
-        bounded_image_3d_scan = np.repeat(np.reshape(bounded_section * 255, (bounded_section.shape[0], bounded_section.shape[1], 1)), 3, axis=2)
+        bounded_image_3d_scan = np.reshape(bounded_section * 255, (bounded_section.shape[0], bounded_section.shape[1], 1))
         return UltrasoundScan(bounded_image_3d_scan)
+
+    # add the points from the annotation to the scan to produce a new image
+    def add_annotations(self):
+        if self.annotations_points is None:
+            raise ValueError('Ultrasound Scan is not Annotated with points')
+        scan_image = self._convert_to_rgb()
+        mask = np.repeat(np.reshape((self.annotations_points.image_3d[:, :, 3] == 0), (self.get_height(), self.get_width(), 1)), 3, axis=2)
+        image_3d_scan_with_points = np.add(np.multiply(scan_image, mask), self.annotations_points.image_3d[:, :, 0:3])
+        return NumpyImage(image_3d_scan_with_points)
