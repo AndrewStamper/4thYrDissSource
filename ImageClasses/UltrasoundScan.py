@@ -31,7 +31,13 @@ class UltrasoundScan(NumpyImage):
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
         numpy_image = super().restrict_to_box(corner_top_left, corner_bottom_right)
-        return UltrasoundScan(numpy_image.image_3d)
+        lines = None
+        points = None
+        if self.annotations_lines is not None:
+            lines = self.annotations_lines.restrict_to_box(corner_top_left, corner_bottom_right)
+        if self.annotations_points is not None:
+            points = self.annotations_points.restrict_to_box(corner_top_left, corner_bottom_right)
+        return UltrasoundScan(numpy_image.image_3d, annotations_lines=lines, annotations_points=points)
 
     # write back to a png
     def write_image(self, filename):

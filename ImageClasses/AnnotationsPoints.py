@@ -16,7 +16,8 @@ class AnnotationPointScan(NumpyImage):
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
         numpy_image = super().restrict_to_box(corner_top_left, corner_bottom_right)
-        new_points = self.points  # TODO move these points
+        corner_bottom_left = [corner_bottom_right[0], corner_top_left[1]]
+        new_points = self.points - np.repeat([corner_bottom_left], 4, axis=0)
         return AnnotationPointScan(numpy_image.image_3d, new_points)
 
     def illium_l_point(self):
