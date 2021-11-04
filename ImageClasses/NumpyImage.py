@@ -23,6 +23,12 @@ class NumpyImage:
     def __init__(self, rows):
         self.image_3d = rows
 
+    # take a sub-image from the whole image
+    def restrict_to_box(self, corner_top_left, corner_bottom_right):
+        # legacy incorporated into ImageClass:NumpyImage
+        restricted_image_3d_scan = self.image_3d[corner_top_left[0]:corner_bottom_right[0], corner_top_left[1]:corner_bottom_right[1]]
+        return NumpyImage(restricted_image_3d_scan)
+
     # print it
     def write_image(self, filename):
         # Function to read the write numpy array of rows*columns*pixels to a png
@@ -42,6 +48,10 @@ class NumpyImage:
     # colour dimensionality
     def get_colour_depth(self):
         return self.image_3d.shape[2]
+
+    # shape
+    def get_shape(self):
+        return self.image_3d.shape
 
     # print
     def to_string(self):
