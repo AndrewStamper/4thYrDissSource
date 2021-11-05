@@ -3,6 +3,7 @@ from Constants import *
 import numpy as np
 import plotly.offline as go_offline
 import plotly.graph_objects as go
+import math
 
 
 class UltrasoundScan(NumpyImage):
@@ -78,13 +79,17 @@ class UltrasoundScan(NumpyImage):
             raise ValueError('Cannot add image to progression as it has incompatible height dimension')
         self.image_3d = np.append(self.image_3d, other.image_3d, axis=1)
 
-    def gauss_filter(self, size_x, size_y):
-        kernel_x = np.array([1.0, 2.0, 1.0])
-        kernel_y = np.array([1.0, 2.0, 1.0])
+    def gauss_filter(self, size, standard_deviation):
+        if size % 2 == 0:
+            raise ValueError("kernel must have odd size")
 
-        normalised_kernel_x = kernel_x/kernel_x.sum
-        normalised_kernel_y = kernel_y/kernel_y.sum
+        kernel = np.zeros(size)
+        for i in range(0, size):
+            x = i - 1 - size/2
+            kernel[i] = (1/math.sqrt(2*math.pi*math.pow(standard_deviation, 2)))*math.exp(-(pow(x, 2)/2*pow(standard_deviation, 2)))
+        size_1_kernel = kernel/kernel.sum()
+        print(size_1_kernel)
 
-        filtered_once = np.apply_along_axis(lambda x: np.convolve(x, normalised_kernel_x, mode='same'), 0, self.image_3d)
-        filtered_twice = np.apply_along_axis(lambda x: np.convolve(x, normalised_kernel_y, mode='same'), 1, filtered_once).astype(dtype=np.uint8)
+        filtered_once = np.apply_along_axis(lambda x: np.convolve(x, size_1_kernel, mode='same'), 0, self.image_3d)
+        filtered_twice = np.apply_along_axis(lambda x: np.convolve(x, size_1_kernel, mode='same'), 1, filtered_once).astype(dtype=np.uint8)
         return UltrasoundScan(filtered_twice)
