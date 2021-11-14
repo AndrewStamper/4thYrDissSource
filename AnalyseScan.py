@@ -1,5 +1,5 @@
-from ImageClasses.UltrasoundScan import UltrasoundScan
-from ImageClasses.AnnotationsLine import AnnotationLineScan
+from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
+from ImageClasses.Lines.AnnotationsLine import AnnotationLineScan
 from ImageClasses.NumpyImage import NumpyImage
 
 
