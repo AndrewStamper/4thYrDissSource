@@ -26,7 +26,7 @@ class NumpyImage:
 
     # initialisation function
     def __init__(self, rows):
-        self.image_3d = rows
+        self.image_3d = rows.astype(dtype=np.uint8)
 
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
