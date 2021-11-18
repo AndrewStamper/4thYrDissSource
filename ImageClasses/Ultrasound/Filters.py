@@ -62,7 +62,6 @@ def _down_sample(shape, array, function):
 def _sliding_window_view(shape, array, step=(1, 1), padding_type='input', padding=0):
 
     # TODO implement padding in output padding mode
-    # TODO increment a step feature for stride
 
     if padding_type == 'input':
         rows_to_add_each_side = math.floor(shape[0] / 2)
