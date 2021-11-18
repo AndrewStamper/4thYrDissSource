@@ -15,4 +15,7 @@ def explore_filtering(scan_number):
     gradient.write_image("explore_filtering_3_Scan.png")
     progression.add_progression(gradient)
 
-    progression.plot_as_3d("explore_filtering_4_3D_surface_of_scan.html")
+    downsampled = original.down_sample((5, 5))
+    downsampled.write_image("explore_filtering_4_Scan.png")
+
+    progression.plot_as_3d("explore_filtering_5_3D_surface_of_scan.html")

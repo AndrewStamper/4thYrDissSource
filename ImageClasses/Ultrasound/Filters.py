@@ -44,11 +44,24 @@ def gradient(self, size, high_val='upper_quartile', low_val='lower_quartile'):
     return type(self)(result)
 
 
+# down sample a ultrasound image
+def down_sample(self, shape):
+    return type(self)(_down_sample(shape, self.image_3d, partial(np.mean, axis=2)))
+
+
+# down sample by a given shape using a given function
+def _down_sample(shape, array, function):
+    v = _sliding_window_view(shape, array, padding_type='none', step=shape)
+    v = np.reshape(v, (v.shape[0], v.shape[1], -1))
+    sampled = function(v)
+    return sampled
+
+
 # take a numpy array and produce a sliding window over it
+# node that an even size shape will produce an array of different size output to input irrespective of padding
 def _sliding_window_view(shape, array, step=(1, 1), padding_type='input', padding=0):
 
-    # TODO fix the padding indexes for even size filters
-    # TODO fix padding in output padding mode
+    # TODO implement padding in output padding mode
     # TODO increment a step feature for stride
 
     if padding_type == 'input':
@@ -57,7 +70,6 @@ def _sliding_window_view(shape, array, step=(1, 1), padding_type='input', paddin
         new_shape = (array.shape[0] + (rows_to_add_each_side * 2), array.shape[1] + (columns_to_add_each_side * 2))
         to_stride = np.full(new_shape, padding)
         to_stride[rows_to_add_each_side:new_shape[0] - rows_to_add_each_side, columns_to_add_each_side:new_shape[1] - columns_to_add_each_side] = array
-
     elif padding_type == 'output' or padding_type == 'none':
         to_stride = array
     else:
@@ -66,11 +78,12 @@ def _sliding_window_view(shape, array, step=(1, 1), padding_type='input', paddin
     stride = np.lib.stride_tricks.sliding_window_view(to_stride, shape)
 
     if padding_type == 'output':
-        stride_prime = np.full((*array.shape, *shape), padding)
-        print(stride_prime.shape)
-        print(stride.shape)
-        stride_prime[shape[0] - 1:stride_prime.shape[0] - shape[0] + 1, shape[1] - 1:stride_prime.shape[1] - shape[1] + 1] = array
-        stride = stride_prime
+        raise ValueError('output mode padding unsupported')
+
+    if step != (1, 1):
+        row_sampled = stride[::shape[0], :, :, :]
+        new_stride = row_sampled[:, ::shape[1], :, :]
+        stride = new_stride
 
     return stride
 
