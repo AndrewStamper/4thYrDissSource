@@ -82,6 +82,17 @@ class UltrasoundScan(NumpyImage):
 
     # add another scan to the side to visualise the progression
     def add_progression(self, other):
-        if other.get_height() != self.get_height():
-            raise ValueError('Cannot add image to progression as it has incompatible height dimension')
-        self.image_3d = np.append(self.image_3d, other.image_3d, axis=1)
+        this_image_3d = self.image_3d
+        other_image_3d = other.image_3d
+
+        if other.get_height() > self.get_height():
+            # must pad this object to add to the progression
+            to_add = np.zeros((other.get_height() - self.get_height(), this_image_3d.shape[1]))
+            this_image_3d = np.append(this_image_3d, to_add, axis=0)
+
+        if other.get_height() < self.get_height():
+            # must pad new object to add to the progression
+            to_add = np.zeros((self.get_height() - other.get_height(), other_image_3d.shape[1]))
+            other_image_3d = np.append(other_image_3d, to_add, axis=0)
+
+        self.image_3d = np.append(this_image_3d, other_image_3d, axis=1)

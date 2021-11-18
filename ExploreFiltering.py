@@ -29,4 +29,9 @@ def explore_filtering(scan_number):
     up_sampled.write_image(file_name + str(file_number) + '_up_sampled')
     file_number = file_number + 1
 
-    progression.plot_as_3d("explore_filtering_6_3D_surface_of_scan.html")
+    up_sampled.add_progression(down_sampled)
+    up_sampled.plot_as_3d(file_name + str(file_number) + '_up_down_sampled.html')
+    file_number = file_number + 1
+
+    progression.plot_as_3d(file_name + str(file_number) + '_3D_surface_of_scan.html')
+    file_number = file_number + 1
