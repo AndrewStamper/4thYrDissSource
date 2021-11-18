@@ -12,7 +12,7 @@ def explore_filtering(scan_number):
     progression = UltrasoundScan.read_image(scan_number + ".jpg")
 
     gauss_filtered = original.gauss_filter(101, 0.7)
-    gauss_filtered.write_image(file_name + str(file_number) + 'gauss_filtered')
+    gauss_filtered.write_image(file_name + str(file_number) + '_gauss_filtered')
     file_number = file_number + 1
     progression.add_progression(gauss_filtered)
 
