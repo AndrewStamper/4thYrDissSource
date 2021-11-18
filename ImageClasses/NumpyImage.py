@@ -37,6 +37,9 @@ class NumpyImage:
     # print it
     def write_image(self, filename):
         # Function to read the write numpy array of rows*columns*pixels to a png
+        if filename[-4:] != '.png':
+            filename = filename+'.png'
+
         file = open(OUTPUT_FILE + filename, 'wb')
         pil_image = Image.fromarray(self.image_3d)
         pil_image.save(file)
