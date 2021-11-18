@@ -18,4 +18,7 @@ def explore_filtering(scan_number):
     downsampled = original.down_sample((5, 5))
     downsampled.write_image("explore_filtering_4_Scan.png")
 
-    progression.plot_as_3d("explore_filtering_5_3D_surface_of_scan.html")
+    upsampled = downsampled.up_sample((5, 5))
+    upsampled.write_image("explore_filtering_5_Scan.png")
+
+    progression.plot_as_3d("explore_filtering_6_3D_surface_of_scan.html")

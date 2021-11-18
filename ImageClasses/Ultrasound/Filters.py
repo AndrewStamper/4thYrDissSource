@@ -44,6 +44,13 @@ def gradient(self, size, high_val='upper_quartile', low_val='lower_quartile'):
     return type(self)(result)
 
 
+# up sample an ultrasound image
+def up_sample(self, shape):
+    extended_rows = np.repeat(self.image_3d, shape[1], axis=1)
+    up_sampled = np.repeat(extended_rows, shape[0], axis=0)
+    return type(self)(up_sampled)
+
+
 # down sample a ultrasound image
 def down_sample(self, shape):
     return type(self)(_down_sample(shape, self.image_3d, partial(np.mean, axis=2)))

@@ -32,7 +32,7 @@ class UltrasoundScan(NumpyImage):
         self.annotations_points = annotations_points
 
     # import all the filtering methods
-    from ImageClasses.Ultrasound.Filters import gauss_filter, gradient, down_sample
+    from ImageClasses.Ultrasound.Filters import gauss_filter, gradient, down_sample, up_sample
 
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
