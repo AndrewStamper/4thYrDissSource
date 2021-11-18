@@ -80,9 +80,8 @@ def _sliding_window_view(shape, array, step=(1, 1), padding_type='input', paddin
         raise ValueError('output mode padding unsupported')
 
     if step != (1, 1):
-        row_sampled = stride[::shape[0], :, :, :]
-        new_stride = row_sampled[:, ::shape[1], :, :]
-        stride = new_stride
+        sampled = stride[::shape[0], ::shape[1], :, :]
+        stride = sampled
 
     return stride
 
