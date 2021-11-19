@@ -2,21 +2,10 @@ from Constants import *
 from PIL import Image
 import numpy as np
 
+
+# Wrapper around each image which is held as a 3d numpy array.
 # Base object which is a numpy array, width, height, colours etc
-# inherit from that to a scan
-# scan has Option[annotations]
-# inherit from base to a annotations
-
-
 class NumpyImage:
-    # Wrapper around each image which is held as a 3d numpy array.
-
-    # Function to read the Annotations stored in the png file and return these as a numpy array of rows*columns*pixels
-    @staticmethod
-    def read_image(filename):
-        img = Image.open(IMAGE_FILE + filename)
-        image_3d = np.asarray(img, dtype=np.uint8)
-        return NumpyImage(image_3d)
 
     @staticmethod
     def find_box(points):
@@ -25,14 +14,23 @@ class NumpyImage:
         return corner_top_left, corner_bottom_right
 
     # initialisation function
-    def __init__(self, rows):
-        self.image_3d = rows.astype(dtype=np.uint8)
+    def __init__(self, rows=None, filename=None):
+        if rows is not None:
+            self.image_3d = rows.astype(dtype=np.uint8)
+        elif filename is not None:
+            self._read_image(filename)
+        else:
+            raise ValueError('No initialisation given')
+
+    # Function to read the image stored in the png file and return these as a numpy array of rows*columns*pixels
+    def _read_image(self, filename):
+        img = Image.open(IMAGE_FILE + filename)
+        self.image_3d = np.asarray(img, dtype=np.uint8)
 
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
-        # legacy incorporated into ImageClass:NumpyImage
         restricted_image_3d_scan = self.image_3d[corner_top_left[0]:corner_bottom_right[0], corner_top_left[1]:corner_bottom_right[1]]
-        return NumpyImage(restricted_image_3d_scan)
+        return type(self)(restricted_image_3d_scan)
 
     # print it
     def write_image(self, filename):

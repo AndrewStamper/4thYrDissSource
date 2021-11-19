@@ -7,24 +7,13 @@ import numpy as np
 class AnnotationLineScan(NumpyImage):
     # Wrapper around line annotation of the scan which is held as a 3d numpy array.
 
-    @staticmethod
-    # read from a file
-    def read_image(filename, scan=None):
-        numpy_image = NumpyImage.read_image(filename)
-        return AnnotationLineScan(numpy_image.image_3d, scan=scan)
-
     # initialise the structure
-    def __init__(self, rows, scan=None):
-        super().__init__(rows)
+    def __init__(self, rows=None, filename=None, scan=None):
+        super().__init__(rows, filename)
         self.ultrasound_scan = scan
         self.annotations_points = None
         if self.ultrasound_scan is not None:
             self.ultrasound_scan.annotations_lines = self
-
-    # take a sub-image from the whole image
-    def restrict_to_box(self, corner_top_left, corner_bottom_right):
-        numpy_image = super().restrict_to_box(corner_top_left, corner_bottom_right)
-        return AnnotationLineScan(numpy_image.image_3d)
 
     # convert to points
     def find_points(self):

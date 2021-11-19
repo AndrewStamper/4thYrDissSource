@@ -8,23 +8,11 @@ import plotly.graph_objects as go
 class UltrasoundScan(NumpyImage):
     # Wrapper around each scan which is held as a numpy array.
 
-    @staticmethod
-    def convert_from_numpy_image(numpy_image):
-        # Convert each pixel into a greyscale value
-        brightness_matrix = np.repeat([np.repeat([RGB_TO_BRIGHTNESS], numpy_image.get_width(), axis=0)], numpy_image.get_height(), axis=0)
-        brightness_image_3d_scan = np.multiply(brightness_matrix, numpy_image.image_3d)
-        image_3d = np.sum(brightness_image_3d_scan, axis=2).astype(dtype=np.uint8)
-        return UltrasoundScan(image_3d)
-
-    @staticmethod
-    # read from a file
-    def read_image(filename):
-        numpy_image = NumpyImage.read_image(filename)
-        return UltrasoundScan.convert_from_numpy_image(numpy_image)
-
     # initialise the structure
-    def __init__(self, rows, annotations_lines=None, annotations_points=None):
-        super().__init__(rows)
+    def __init__(self, rows=None, filename=None, annotations_lines=None, annotations_points=None):
+        super().__init__(rows, filename)
+        if self.image_3d.ndim > 2:
+            self.convert_from_numpy_image()
         self.image_3d = self.image_3d - np.amin(self.image_3d)
         self.image_3d = self.image_3d * (255/np.amax(self.image_3d))
 
@@ -33,6 +21,15 @@ class UltrasoundScan(NumpyImage):
 
     # import all the filtering methods
     from ImageClasses.Ultrasound.Filters import gauss_filter, gradient, down_sample, up_sample
+
+    def convert_from_numpy_image(self, numpy_image=None):
+        # Convert each pixel into a greyscale value
+        if numpy_image is None:
+            numpy_image = self
+
+        brightness_matrix = np.repeat([np.repeat([RGB_TO_BRIGHTNESS], numpy_image.get_width(), axis=0)], numpy_image.get_height(), axis=0)
+        brightness_image_3d_scan = np.multiply(brightness_matrix, numpy_image.image_3d)
+        self.image_3d = np.sum(brightness_image_3d_scan, axis=2).astype(dtype=np.uint8)
 
     # take a sub-image from the whole image
     def restrict_to_box(self, corner_top_left, corner_bottom_right):
@@ -43,7 +40,7 @@ class UltrasoundScan(NumpyImage):
             lines = self.annotations_lines.restrict_to_box(corner_top_left, corner_bottom_right)
         if self.annotations_points is not None:
             points = self.annotations_points.restrict_to_box(corner_top_left, corner_bottom_right)
-        return UltrasoundScan(numpy_image.image_3d, annotations_lines=lines, annotations_points=points)
+        return type(self)(numpy_image.image_3d, annotations_lines=lines, annotations_points=points)
 
     # write back to a png
     def write_image(self, filename):
@@ -69,7 +66,7 @@ class UltrasoundScan(NumpyImage):
     def bound_values(self, brightness):
         bounded_section = np.greater_equal(self.image_3d, np.full(self.get_shape(), brightness)).astype('uint8')
         bounded_image_3d_scan = np.reshape(bounded_section * 255, (bounded_section.shape[0], bounded_section.shape[1], 1))
-        return UltrasoundScan(bounded_image_3d_scan)
+        return type(self)(bounded_image_3d_scan)
 
     # add the points from the annotation to the scan to produce a new image
     def add_annotations(self, annotations=None):

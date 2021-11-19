@@ -4,8 +4,8 @@ from ImageClasses.NumpyImage import NumpyImage
 
 
 def analyse_scan(scan_number):
-    ultrasound_scan = UltrasoundScan.read_image(scan_number + ".jpg")
-    lines = AnnotationLineScan.read_image(scan_number + "_a.png", scan=ultrasound_scan)
+    ultrasound_scan = UltrasoundScan(filename=(scan_number + ".jpg"))
+    lines = AnnotationLineScan(filename=(scan_number + "_a.png"), scan=ultrasound_scan)
     points = lines.find_points()
 
     lines.write_image("analyse_scan_0_Annotations.png")
