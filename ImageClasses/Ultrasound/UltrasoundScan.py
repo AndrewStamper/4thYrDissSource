@@ -72,9 +72,11 @@ class UltrasoundScan(NumpyImage):
         return UltrasoundScan(bounded_image_3d_scan)
 
     # add the points from the annotation to the scan to produce a new image
-    def add_annotations(self):
-        if self.annotations_points is None:
-            raise ValueError('Ultrasound Scan is not Annotated with points')
+    def add_annotations(self, annotations=None):
+        if annotations is None:
+            annotations = self.annotations_points
+            if annotations is None:
+                raise ValueError('Ultrasound Scan is not Annotated with points')
         scan_image = self._convert_to_rgb()
         mask = np.repeat(np.reshape((self.annotations_points.image_3d[:, :, 3] == 0), (self.get_height(), self.get_width(), 1)), 3, axis=2)
         image_3d_scan_with_points = np.add(np.multiply(scan_image, mask), self.annotations_points.image_3d[:, :, 0:3])
