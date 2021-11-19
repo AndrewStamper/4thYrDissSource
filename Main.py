@@ -4,10 +4,10 @@ from Visualise_mask import visualise_mask
 
 scan_number = "A080L"
 
-# analyse_scan(scan_number)
+analyse_scan(scan_number)
 
-# explore_filtering(scan_number)
+explore_filtering(scan_number)
 
-visualise_mask(scan_number)
+visualise_mask("A001R")
 
 print("complete")

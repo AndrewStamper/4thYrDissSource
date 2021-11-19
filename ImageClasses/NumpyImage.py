@@ -23,8 +23,8 @@ class NumpyImage:
             raise ValueError('No initialisation given')
 
     # Function to read the image stored in the png file and return these as a numpy array of rows*columns*pixels
-    def _read_image(self, filename):
-        img = Image.open(IMAGE_FILE + filename)
+    def _read_image(self, filename, location=IMAGE_FILE):
+        img = Image.open(location + filename)
         self.image_3d = np.asarray(img, dtype=np.uint8)
 
     # take a sub-image from the whole image

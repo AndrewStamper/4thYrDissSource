@@ -1,5 +1,6 @@
 OUTPUT_FILE = "../output/"
 IMAGE_FILE = "../AlderHayUltrasounds/"
+MASK_FILE = "../AlderHayUltrasoundsMasks/"
 
 RGB_TO_BRIGHTNESS = [0.21, 0.72, 0.07]
 
