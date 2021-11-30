@@ -4,7 +4,7 @@ import numpy as np
 
 
 class AnnotationMaskScan(TwoDNumpyImage):
-    # Class to encapsulate a given mask for illium, femoral head or
+    # Class to encapsulate a given mask for illium, femoral head or labrum
 
     # initialise the structure
     def __init__(self, rows=None, filename=None, scan=None):
