@@ -3,7 +3,7 @@ import numpy as np
 
 
 class UltrasoundScan(TwoDNumpyImage):
-    # Wrapper around each scan which is held as a numpy array.
+    # Class to encapsulate an ultrasound scan. inherits from a 2d scan as it is black and white.
 
     # initialise the structure
     def __init__(self, rows=None, filename=None, annotations_lines=None, annotations_points=None):
@@ -32,7 +32,7 @@ class UltrasoundScan(TwoDNumpyImage):
             annotations = self.annotations_points
             if annotations is None:
                 raise ValueError('Ultrasound Scan is not Annotated with points')
-        scan_image = self._convert_to_rgb()
+        scan_image = self.convert_to_rgb()
         mask = np.repeat(np.reshape((annotations.image_3d[:, :, 3] == 0), (self.get_height(), self.get_width(), 1)), 3, axis=2)
-        image_3d_scan_with_points = np.add(np.multiply(scan_image, mask), annotations.image_3d[:, :, 0:3])
+        image_3d_scan_with_points = np.add(np.multiply(scan_image.image_3d, mask), annotations.image_3d[:, :, 0:3])
         return NumpyImage(image_3d_scan_with_points)
