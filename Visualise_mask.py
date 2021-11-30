@@ -9,11 +9,11 @@ def visualise_mask(scan_number):
 
     ultrasound_scan = UltrasoundScan(filename=(scan_number + ".jpg"))
 
-    illium = AnnotationMaskScan(filename=(scan_number + "_i.png"), colour=RGBA_RED)
-    femoral_head = AnnotationMaskScan(filename=(scan_number + "_f.png"), colour=RGBA_BLUE)
-    labrum = AnnotationMaskScan(filename=(scan_number + "_l.png"), colour=RGBA_GREEN)
+    illium = AnnotationMaskScan(filename=(scan_number + "_i.png")).convert_to_rgb(colour=RGBA_RED)
+    femoral_head = AnnotationMaskScan(filename=(scan_number + "_f.png")).convert_to_rgb(colour=RGBA_BLUE)
+    labrum = AnnotationMaskScan(filename=(scan_number + "_l.png")).convert_to_rgb(colour=RGBA_GREEN)
 
-    i_f_l = illium.combine_masks(femoral_head).combine_masks(labrum)
+    i_f_l = illium + femoral_head + labrum
 
     ultrasound_scan.write_image(file_name + str(file_number) + '_original')
     file_number = file_number + 1
