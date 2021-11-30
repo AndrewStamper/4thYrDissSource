@@ -43,6 +43,11 @@ class NumpyImage:
         pil_image.save(file)
         file.close()
 
+    def __add__(self, other):
+        if self.get_shape() != other.get_shape():
+            raise ValueError('invalid size of masks to combine')
+        return type(self)(self.image_3d + other.image_3d)
+
     # width
     def get_width(self):
         return self.image_3d.shape[1]
