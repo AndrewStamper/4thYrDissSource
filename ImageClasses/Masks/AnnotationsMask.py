@@ -1,6 +1,5 @@
 from ImageClasses.TwoDNumpyImage import TwoDNumpyImage
 from Constants import *
-import numpy as np
 
 
 class AnnotationMaskScan(TwoDNumpyImage):
