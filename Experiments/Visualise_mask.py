@@ -1,5 +1,5 @@
 from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
-from ImageClasses.Masks.AnnotationsMask import AnnotationMaskScan
+from ImageClasses.Masks.AnnotationsMask import MaskCollection
 from Constants import *
 
 
@@ -9,9 +9,11 @@ def visualise_mask(scan_number):
 
     ultrasound_scan = UltrasoundScan(filename=(scan_number + ".jpg"))
 
-    illium = AnnotationMaskScan(filename=(scan_number + "_i.png")).convert_to_rgb(colour=RGBA_RED)
-    femoral_head = AnnotationMaskScan(filename=(scan_number + "_f.png")).convert_to_rgb(colour=RGBA_BLUE)
-    labrum = AnnotationMaskScan(filename=(scan_number + "_l.png")).convert_to_rgb(colour=RGBA_GREEN)
+    mask_collection = MaskCollection(scan_number)
+
+    illium = mask_collection.illium.convert_to_rgb(colour=RGBA_RED)
+    femoral_head = mask_collection.femoral_head.convert_to_rgb(colour=RGBA_BLUE)
+    labrum = mask_collection.labrum.convert_to_rgb(colour=RGBA_GREEN)
 
     i_f_l = illium + femoral_head + labrum
 
