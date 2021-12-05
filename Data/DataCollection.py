@@ -26,6 +26,3 @@ class ScanCollection:
             return self.scans[index[0][0]]
         else:
             raise ValueError('Scan is not in the set')
-
-
-
