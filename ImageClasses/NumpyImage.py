@@ -32,6 +32,19 @@ class NumpyImage:
         restricted_image_3d_scan = self.image_3d[corner_top_left[0]:corner_bottom_right[0], corner_top_left[1]:corner_bottom_right[1]]
         return type(self)(restricted_image_3d_scan)
 
+    # crop an image to a selected size
+    def crop(self, shape):
+        # print("image dimensions: " + str(self.image_3d.shape))
+        difference = np.subtract(self.image_3d.shape, shape)
+        if not(np.all(difference > 0)):
+            print("image dimensions: " + str(self.image_3d.shape))
+            print("crop dimensions: " + str(shape))
+            raise ValueError("cropping to a image size larger than the original image")
+
+        corner_top_left = np.int64(np.floor(difference/2))
+        corner_bottom_right = np.subtract(self.image_3d.shape, difference - corner_top_left)
+        self.image_3d = self.restrict_to_box(corner_top_left, corner_bottom_right).image_3d
+
     # print it
     def write_image(self, filename):
         # Function to read the write numpy array of rows*columns*pixels to a png

@@ -6,3 +6,5 @@ def test_data():
     training_data = ScanCollection(scan_numbers)
     first = training_data.get_scan("A001L")
     first.ultrasound_scan.write_image("A001L" + '_original')
+    training_data.crop((512, 512))
+    first.ultrasound_scan.write_image("A001L" + '_cropped')

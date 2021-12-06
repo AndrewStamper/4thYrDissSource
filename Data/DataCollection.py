@@ -9,8 +9,12 @@ class _Scan:
         self.ultrasound_scan = UltrasoundScan(filename=(scan_number + ".jpg"))
         self.ground_truth = MaskCollection(scan_number)
 
+    def crop(self, shape):
+        self.ultrasound_scan.crop(shape)
+        self.ground_truth.crop(shape)
 
-# each object of this type will be a set of scans and their corresponding scans
+
+# each object of this type will be a set of scans and their corresponding masks
 class ScanCollection:
     def __init__(self, scan_numbers):
         self.scan_numbers = np.asarray(scan_numbers)
@@ -26,3 +30,7 @@ class ScanCollection:
             return self.scans[index[0][0]]
         else:
             raise ValueError('Scan is not in the set')
+
+    def crop(self, shape):
+        for scan in self.scans:
+            scan.crop(shape)

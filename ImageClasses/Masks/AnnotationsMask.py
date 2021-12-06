@@ -20,3 +20,8 @@ class MaskCollection:
         self.illium = AnnotationMaskScan(filename=(scan_number + "_i.png"))
         self.femoral_head = AnnotationMaskScan(filename=(scan_number + "_f.png"))
         self.labrum = AnnotationMaskScan(filename=(scan_number + "_l.png"))
+
+    def crop(self, shape):
+        self.illium.crop(shape)
+        self.femoral_head.crop(shape)
+        self.labrum.crop(shape)
