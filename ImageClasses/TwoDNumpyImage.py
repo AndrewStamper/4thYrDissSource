@@ -3,7 +3,7 @@ from Constants import *
 import numpy as np
 import plotly.offline as go_offline
 import plotly.graph_objects as go
-
+import os
 
 class TwoDNumpyImage(NumpyImage):
 
@@ -40,6 +40,9 @@ class TwoDNumpyImage(NumpyImage):
 
     # plot in 3d
     def plot_as_3d(self, filename):
+        directory_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(directory_path, "../" + OUTPUT_FILE + filename)
+
         x = np.repeat([np.arange(self.get_width())], self.get_height(), axis=0)
         y = np.repeat(np.flip(np.arange(self.get_height())).reshape(-1, 1), self.get_width(), axis=1)
 
@@ -47,7 +50,7 @@ class TwoDNumpyImage(NumpyImage):
         fig.add_trace(go.Surface(z=self.image_3d, x=x, y=y))
         fig.update_layout(
             scene=dict(aspectratio=dict(x=self.get_width() / 100, y=self.get_height() / 100, z=125 / 100), xaxis=dict(range=[0, self.get_width()], ), yaxis=dict(range=[0, self.get_height()])))
-        go_offline.plot(fig, filename=OUTPUT_FILE + filename, validate=True, auto_open=False)
+        go_offline.plot(fig, filename=new_path, validate=True, auto_open=False)
 
     # use a bounding value to segment
     def bound_values(self, brightness):

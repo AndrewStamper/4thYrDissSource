@@ -1,7 +1,7 @@
 from Constants import *
 from PIL import Image
 import numpy as np
-
+import os
 
 # Wrapper around each image which is held as a 3d numpy array.
 # Base object which is a numpy array, width, height, colours etc
@@ -24,7 +24,9 @@ class NumpyImage:
 
     # Function to read the image stored in the png file and return these as a numpy array of rows*columns*pixels
     def _read_image(self, filename, location=IMAGE_FILE):
-        img = Image.open(location + filename)
+        directory_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(directory_path, "../" + location + filename)
+        img = Image.open(new_path)
         self.image_3d = np.asarray(img, dtype=np.uint8)
 
     # take a sub-image from the whole image
@@ -51,7 +53,10 @@ class NumpyImage:
         if filename[-4:] != '.png':
             filename = filename+'.png'
 
-        file = open(OUTPUT_FILE + filename, 'wb')
+        directory_path = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(directory_path, "../" + OUTPUT_FILE + filename)
+
+        file = open(new_path, 'wb')
         pil_image = Image.fromarray(self.image_3d)
         pil_image.save(file)
         file.close()
