@@ -1,3 +1,7 @@
+"""
+This is the main API which calls all subsequent actions
+"""
+
 from Experiments.AnalyseScan import analyse_scan
 from Experiments.ExploreFiltering import explore_filtering
 from Experiments.Visualise_mask import visualise_mask

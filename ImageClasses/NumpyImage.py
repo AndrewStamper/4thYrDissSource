@@ -3,12 +3,18 @@ from PIL import Image
 import numpy as np
 import os
 
-# Wrapper around each image which is held as a 3d numpy array.
-# Base object which is a numpy array, width, height, colours etc
+
 class NumpyImage:
+
+    """
+    Wrapper around each image which is held as a 3d numpy array.
+    Base object which is a numpy array, width, height, colours etc
+    """
 
     @staticmethod
     def find_box(points):
+        """text
+        """
         corner_top_left = (np.amin(points[:, 0]), np.amin(points[:, 1]))
         corner_bottom_right = (np.amax(points[:, 0]), np.amax(points[:, 1]))
         return corner_top_left, corner_bottom_right
