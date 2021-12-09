@@ -25,3 +25,16 @@ class MaskCollection:
         self.illium.crop(shape)
         self.femoral_head.crop(shape)
         self.labrum.crop(shape)
+
+    def as_RBGA(self):
+        i = self.illium.convert_to_rgb(colour=RGBA_RED)
+        f_h = self.femoral_head.convert_to_rgb(colour=RGBA_BLUE)
+        l = self.labrum.convert_to_rgb(colour=RGBA_GREEN)
+        return i + f_h + l
+
+    def as_single(self):
+        rgba = self.as_RBGA().image_3d
+        rgb = rgba[:,:,0:3]
+        return rgb
+
+
