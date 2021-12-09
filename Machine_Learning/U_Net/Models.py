@@ -6,6 +6,7 @@ class _Unit(tf.keras.layers.Layer):
     def __init__(self, num_convolutions=2, depth=4, size=3):
         assert num_convolutions > 0
         super().__init__()
+        self.size = size
         self.depth = depth
         self.num_convolutions = num_convolutions
         if self.num_convolutions > 1:
@@ -61,23 +62,6 @@ class _Layer(tf.keras.layers.Layer):
             return self.right.call(combined)
 
 
-# Define model
-# noinspection PyCallingNonCallable
-class ClassificationModel(tf.keras.Model):
-    def __init__(self):
-        super().__init__()
-        self.top_layer = _Layer(auto=UnetConfig(tiers=3, num_filters=4))
-        self.flatten = Flatten()
-        self.d1 = Dense(128, activation='relu')
-        self.d2 = Dense(10)
-
-    def call(self, inp):
-        c_1 = self.top_layer(inp)
-        end_0 = self.flatten(c_1)
-        end_1 = self.d1(end_0)
-        return self.d2(end_1)
-
-
 class UnetConfig:
     def __init__(self, tiers=3, filter_ratio=2, scale=2, num_filters=4, num_convolutions=2, convolution_size=3):
         self.tiers = tiers
@@ -90,12 +74,34 @@ class UnetConfig:
 
 # Define model
 # noinspection PyCallingNonCallable
-class SegmentationModel(tf.keras.Model):
+class ClassificationModel(tf.keras.Model):
     def __init__(self, config=UnetConfig()):
         super().__init__()
         self.top_layer = _Layer(auto=config)
+        self.flatten = Flatten()
+        self.d1 = Dense(128, activation='relu')
+        self.d2 = Dense(10)
 
     def call(self, inp):
-        return self.top_layer(inp)
+        c_1 = self.top_layer(inp)
+        end_0 = self.flatten(c_1)
+        end_1 = self.d1(end_0)
+        return self.d2(end_1)
+
+
+# Define model
+# noinspection PyCallingNonCallable
+class SegmentationModel(tf.keras.Model):
+    def __init__(self, config=UnetConfig(), dim=1):
+        super().__init__()
+        self.top_layer = _Layer(auto=config)
+        self.to_features = Conv2D(dim, self.top_layer.left.size, activation='relu', padding="same")
+        self.flatten = Flatten()
+
+    def call(self, inp):
+        x = self.top_layer(inp)
+        x = self.to_features(x)
+        x = self.flatten(x)
+        return x
 
 
