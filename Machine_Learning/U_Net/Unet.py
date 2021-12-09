@@ -1,6 +1,6 @@
 import tensorflow as tf
 from Machine_Learning.U_Net.Models import UnetConfig, ClassificationModel, SegmentationModel
-
+import numpy as np
 
 class Unet:
     def __init__(self, mode="Segmentation", s_dim=1, config=UnetConfig()):
@@ -108,9 +108,11 @@ class Unet:
             self.one_epoch(train_ds, test_ds)
 
     def get_mask(self, x):
+        npx = np.asarray(x)
+        npxre = npx.reshape((1, *npx.shape, 1))
         # noinspection PyCallingNonCallable
-        y = self.model(x, training=False)
-        return y.reshape((*x.shape, -1))
+        y = self.model(npxre, training=False)
+        return np.asarray(y).reshape(npx.shape)
 
 
 
