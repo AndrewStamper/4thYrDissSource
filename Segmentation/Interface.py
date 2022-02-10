@@ -2,10 +2,20 @@ import tensorflow as tf
 from IPython.display import clear_output
 import matplotlib.pyplot as plt
 
-from Segmentation.surrounding import inputs, display
 from Segmentation.Augmentations import Augment
 from Segmentation.Model import unet_model
 from Constants import BATCH_SIZE, BUFFER_SIZE, OUTPUT_CLASSES, EPOCHS, VAL_SUBSPLITS
+
+
+def display(display_list):
+    plt.figure(figsize=(15, 15))
+    title = ['Input Image', 'True Mask', 'Predicted Mask']
+    for i in range(len(display_list)):
+        plt.subplot(1, len(display_list), i+1)
+        plt.title(title[i])
+        plt.imshow(tf.keras.utils.array_to_img(display_list[i]))
+        plt.axis('off')
+    plt.show()
 
 
 class ML(tf.keras.layers.Layer):
@@ -84,9 +94,9 @@ class ML(tf.keras.layers.Layer):
         plt.show()
 
 
-train_imageso, test_imageso, infoo = inputs()
-ml = ML(train_imageso, test_imageso, infoo)
-ml.display_example()
-ml.train()
-ml.show_epoch_progression()
-ml.display_example(predictions=True, train_data=False, num=3)
+# train_imageso, test_imageso, infoo = inputs()
+# ml = ML(train_imageso, test_imageso, infoo)
+# ml.display_example()
+# ml.train()
+# ml.show_epoch_progression()
+# ml.display_example(predictions=True, train_data=False, num=3)
