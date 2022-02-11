@@ -1,5 +1,6 @@
 from ImageClasses.TwoDNumpyImage import TwoDNumpyImage
 from Constants import *
+import numpy as np
 
 
 class AnnotationMaskScan(TwoDNumpyImage):
@@ -34,7 +35,13 @@ class MaskCollection:
 
     def as_single(self):
         rgba = self.as_RBGA().image_3d
-        rgb = rgba[:,:,0:3]
+        rgb = rgba[:, :, 0:3]
         return rgb
+
+    def as_single_1d(self):
+        rgba = self.as_RBGA().image_3d
+        rgba[:, :, 3] = 10
+        pred_mask = np.argmax(rgba, axis=-1).reshape((rgba.shape[0], rgba.shape[1], 1))
+        return pred_mask
 
 
