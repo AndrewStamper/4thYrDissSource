@@ -1,6 +1,7 @@
 from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
 from ImageClasses.Masks.AnnotationsMask import MaskCollection
 import numpy as np
+import tensorflow as tf
 
 
 # pair of ground truth masks and their corresponding ultrasound scan
@@ -40,11 +41,13 @@ class ScanCollection:
             scan.crop(shape)
 
     def load_data(self):
-        x = np.zeros((*self.scans.shape, *self.scans[0].ultrasound_scan.image_3d.shape))
-        y = np.zeros((*x.shape, 3))
+        x = np.zeros((*self.scans.shape, *self.scans[0].ultrasound_scan.image_3d.shape, 3))
+        y = np.zeros((*self.scans.shape, *self.scans[0].ultrasound_scan.image_3d.shape, 1))
 
         for i in range(0, self.scans.shape[0]):
-            x[i, :, :] = self.scans[i].ultrasound_scan.image_3d
+            x[i, :, :, 0] = self.scans[i].ultrasound_scan.image_3d
             if not self.predictions_only:
-                y[i, :, :] = self.scans[i].ground_truth.as_single()
-        return x, y
+                y[i, :, :] = self.scans[i].ground_truth.as_single_mask()
+
+        dataset = tf.data.Dataset.from_tensor_slices((x, y))
+        return dataset
