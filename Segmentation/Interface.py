@@ -1,15 +1,16 @@
 import tensorflow as tf
 from IPython.display import clear_output
 import matplotlib.pyplot as plt
-
-from Segmentation.Augmentations import Augment
+from Segmentation.Augmentations import Augmenter
 from Segmentation.Model import unet_model
 from Constants import BATCH_SIZE, BUFFER_SIZE, OUTPUT_CLASSES, EPOCHS, VAL_SUBSPLITS
+from Constants import AUGMENTATION_SEED, AUGMENTATION_TYPE_DEMO
 
 
 def display(display_list):
     plt.figure(figsize=(15, 15))
     title = ['Input Image', 'True Mask', 'Predicted Mask']
+
     for i in range(len(display_list)):
         plt.subplot(1, len(display_list), i+1)
         plt.title(title[i])
@@ -19,18 +20,22 @@ def display(display_list):
 
 
 class ML(tf.keras.layers.Layer):
-    def __init__(self, train_images, validation_images, info):
-        self.info = info
+    def __init__(self, train_images, validation_images, augmentations_type=AUGMENTATION_TYPE_DEMO, augmentations_seed=AUGMENTATION_SEED):
+        self.train_num_examples = len(train_images)
+        self.validation_num_examples = len(validation_images)
+
+        augmenter = Augmenter(augmentations_type, augmentations_seed)
 
         # configure batches
         self.train_batches = (
             train_images
                 .cache()
                 .shuffle(BUFFER_SIZE)
-                .batch(BATCH_SIZE)
                 .repeat()
-                .map(Augment())
+                .map(lambda x, y: (augmenter.call(x, y)), num_parallel_calls=tf.data.AUTOTUNE)
+                .batch(BATCH_SIZE)
                 .prefetch(buffer_size=tf.data.AUTOTUNE))
+
         self.validation_batches = validation_images.batch(BATCH_SIZE)
 
         # setup the model itself
@@ -38,7 +43,7 @@ class ML(tf.keras.layers.Layer):
         self.model.compile(optimizer='adam',
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])
-        tf.keras.utils.plot_model(self.model, show_shapes=True)
+        # tf.keras.utils.plot_modParallelMapDatasetel(self.model, show_shapes=True)
         self.model_history = None
 
         # setup sample
@@ -65,13 +70,13 @@ class ML(tf.keras.layers.Layer):
 
     def train(self):
         class DisplayCallback(tf.keras.callbacks.Callback):
-            def on_epoch_end(innerself, epoch, logs=None):
+            def on_epoch_end(inner_self, epoch, logs=None):
                 clear_output(wait=True)
                 self.display_example(predictions=True, train_data=True, num=1)
                 print('\nSample Prediction after epoch {}\n'.format(epoch+1))
 
-        steps_per_epoch = self.info.splits['train'].num_examples // BATCH_SIZE
-        validation_steps = self.info.splits['test'].num_examples//BATCH_SIZE//VAL_SUBSPLITS
+        steps_per_epoch = self.train_num_examples // BATCH_SIZE
+        validation_steps = self.validation_num_examples //BATCH_SIZE//VAL_SUBSPLITS
 
         self.model_history = self.model.fit(self.train_batches, epochs=EPOCHS,
                                             steps_per_epoch=steps_per_epoch,
@@ -92,11 +97,3 @@ class ML(tf.keras.layers.Layer):
         plt.ylim([0, 1])
         plt.legend()
         plt.show()
-
-
-# train_imageso, test_imageso, infoo = inputs()
-# ml = ML(train_imageso, test_imageso, infoo)
-# ml.display_example()
-# ml.train()
-# ml.show_epoch_progression()
-# ml.display_example(predictions=True, train_data=False, num=3)
