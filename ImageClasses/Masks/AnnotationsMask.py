@@ -27,21 +27,28 @@ class MaskCollection:
         self.femoral_head.crop(shape)
         self.labrum.crop(shape)
 
-    def as_RBGA(self):
+    def as_RGBA(self):
         i = self.illium.convert_to_rgb(colour=RGBA_RED)
         f_h = self.femoral_head.convert_to_rgb(colour=RGBA_BLUE)
         l = self.labrum.convert_to_rgb(colour=RGBA_GREEN)
         return i + f_h + l
 
-    def as_single(self):
-        rgba = self.as_RBGA().image_3d
+    def as_RGB(self):
+        rgba = self.as_RGBA().image_3d
         rgb = rgba[:, :, 0:3]
         return rgb
 
-    def as_single_1d(self):
-        rgba = self.as_RBGA().image_3d
-        rgba[:, :, 3] = 10
-        pred_mask = np.argmax(rgba, axis=-1).reshape((rgba.shape[0], rgba.shape[1], 1))
+    def as_segmentation_mask(self):
+        rgba = self.as_RGBA().image_3d  # get each mask in separate channel
+        rgba[:, :, 3] = 0  # set 4th channel (background) to zeros intensity
+        i = [3, 0, 1, 2]  # reorder so if none of three masks are lit it returns background
+        argb = rgba[:, :, i]
+        pred_mask = np.argmax(argb, axis=-1).reshape((rgba.shape[0], rgba.shape[1], 1))  # brightest of the channels = mask value
         return pred_mask
+
+    def down_sample(self, shape):
+        self.illium = self.illium.down_sample(shape)
+        self.femoral_head = self.femoral_head.down_sample(shape)
+        self.labrum = self.labrum.down_sample(shape)
 
 
