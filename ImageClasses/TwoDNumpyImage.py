@@ -74,3 +74,6 @@ class TwoDNumpyImage(NumpyImage):
             other_image_3d = np.append(other_image_3d, to_add, axis=0)
 
         self.image_3d = np.append(this_image_3d, other_image_3d, axis=1)
+
+    # import all the filtering methods
+    from ImageClasses.Ultrasound.Filters import gauss_filter, gradient, down_sample, up_sample

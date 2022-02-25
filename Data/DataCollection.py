@@ -17,6 +17,11 @@ class _Scan:
         if not self.predictions_only:
             self.ground_truth.crop(shape)
 
+    def max_pool(self, shape):
+        self.ultrasound_scan = self.ultrasound_scan.down_sample(shape)
+        if not self.predictions_only:
+            self.ground_truth.down_sample(shape)
+
 
 # each object of this type will be a set of scans and their corresponding masks
 class ScanCollection:
@@ -40,6 +45,10 @@ class ScanCollection:
         for scan in self.scans:
             scan.crop(shape)
 
+    def max_pool(self, shape):
+        for scan in self.scans:
+            scan.max_pool(shape)
+
     def load_data(self):
         x = np.zeros((*self.scans.shape, *self.scans[0].ultrasound_scan.image_3d.shape, 3))
         y = np.zeros((*self.scans.shape, *self.scans[0].ultrasound_scan.image_3d.shape, 1))
@@ -47,7 +56,7 @@ class ScanCollection:
         for i in range(0, self.scans.shape[0]):
             x[i, :, :, 0] = self.scans[i].ultrasound_scan.image_3d
             if not self.predictions_only:
-                y[i, :, :] = self.scans[i].ground_truth.as_single_mask()
+                y[i, :, :] = self.scans[i].ground_truth.as_segmentation_mask()
 
         dataset = tf.data.Dataset.from_tensor_slices((x, y))
         return dataset

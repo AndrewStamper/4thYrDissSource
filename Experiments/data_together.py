@@ -18,8 +18,10 @@ def test_data():
     validation_data = ScanCollection(validation_scan_numbers)
 
     # crop data
-    training_data.crop(INPUT_SHAPE)
-    validation_data.crop(INPUT_SHAPE)
+    training_data.crop(CROP_SHAPE)
+    validation_data.crop(CROP_SHAPE)
+    training_data.max_pool((3, 3))
+    validation_data.max_pool((3, 3))
 
     # convert data into format for tensorflow
     train_dataset = training_data.load_data()
