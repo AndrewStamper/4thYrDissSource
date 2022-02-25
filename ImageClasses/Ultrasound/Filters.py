@@ -4,20 +4,49 @@ import math
 
 
 # apply a gaussian filter to the scan
-def gauss_filter(self, size, standard_deviation):
-    if size % 2 == 0:
-        raise ValueError("kernel must have odd size")
+def gauss_filter(self, shape, standard_deviation):
 
-    kernel = np.zeros(size)
-    for i in range(0, size):
-        x = i - 1 - size / 2
+    # kernel_row = np.zeros(shape[1])
+    # for i in range(0, shape[1]):
+    #     x = i - 1 - shape[1] / 2
+    #     kernel_row[i] = (1 / math.sqrt(2 * math.pi * math.pow(standard_deviation, 2))) * math.exp(-(pow(x, 2) / 2 * pow(standard_deviation, 2)))
+    #
+    # kernel_column = np.zeros(shape[0])
+    # for i in range(0, shape[0]):
+    #     x = i - 1 - shape[0] / 2
+    #     kernel_column[i] = (1 / math.sqrt(2 * math.pi * math.pow(standard_deviation, 2))) * math.exp(-(pow(x, 2) / 2 * pow(standard_deviation, 2)))
+    #
+    # kernel = np.repeat(kernel_row, shape[0], axis=0) * np.transpose(np.repeat(kernel_column, shape[1], axis=0))
+    # size_1_kernel = kernel / kernel.sum()
+    #
+    # v = _sliding_window_view(shape, self.image_3d, padding_type='input')
+    #
+    # kernel_row = np.repeat([kernel], v.shape[1], axis=0)
+    # print(kernel_row.shape)
+    #
+    # value = np.apply_along_axis(lambda x: np.multiply(x, kernel_row), 1, v)
+    #
+    # return type(self)(value)
+
+    kernel = np.zeros(shape[0])
+    for i in range(0, shape[1]):
+        x = i - 1 - shape[1] / 2
         kernel[i] = (1 / math.sqrt(2 * math.pi * math.pow(standard_deviation, 2))) * math.exp(-(pow(x, 2) / 2 * pow(standard_deviation, 2)))
+
     size_1_kernel = kernel / kernel.sum()
     # print(size_1_kernel)
 
     filtered_once = np.apply_along_axis(lambda x: np.convolve(x, size_1_kernel, mode='same'), 0, self.image_3d)
     filtered_twice = np.apply_along_axis(lambda x: np.convolve(x, size_1_kernel, mode='same'), 1, filtered_once).astype(dtype=np.uint8)
+
     return type(self)(filtered_twice)
+
+
+#def _kernel_multiplication(kernel, strided):
+    #kernel_row = np.repeat([kernel], strided.shape[1], axis=0)
+    #kernel_repeated = np.repeat([kernel_row], strided.shape[0], axis=0)
+    #return np.apply_along_axis(lambda x: np.convolve(x, kernel, mode='same'), 2, strided)
+    #np.reshape(strided*kernel_repeated, (strided.shape[0], strided.shape[1]))
 
 
 # do simplistic edge detection using sudden change in brightness
@@ -91,4 +120,3 @@ def _sliding_window_view(shape, array, step=(1, 1), padding_type='input', paddin
         stride = sampled
 
     return stride
-
