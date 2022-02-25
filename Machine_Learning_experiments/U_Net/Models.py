@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Flatten, Conv2D, Conv2DTranspose, MaxPool2D, concatenate  # , Cropping2D
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, Conv2DTranspose, MaxPool2D, concatenate, Input, ReLU, BatchNormalization  # , Cropping2D
 
 
 class _Unit(tf.keras.layers.Layer):
@@ -105,3 +105,83 @@ class SegmentationModel(tf.keras.Model):
         return x
 
 
+
+def testunit(inputs, filters = 3):
+    conv1 = Conv2D(filters=filters, kernel_size=4, activation='relu', padding="same")
+    conv2 = Conv2D(filters=filters, kernel_size=4, activation='relu', padding="same")
+
+    conv1d = conv1(inputs)
+    batch_norm1 = BatchNormalization()(conv1d)
+    act1 = ReLU()(batch_norm1)
+
+    conv2d = conv2(act1)
+    batch_norm2 = BatchNormalization()(conv2d)
+    act2 = ReLU()(batch_norm2)
+
+    return act2
+
+def testlayer(input_shape, down, filters = 3):
+    inputs = Input(shape=input_shape)
+    pool = MaxPool2D(pool_size=2)
+    upconv = Conv2DTranspose(filters=filters, kernel_size=4, strides=2, activation='relu', padding="same")
+
+    dl = testunit(inputs, filters=filters)
+    sb = pool(dl)
+    db = down(sb)
+    ub = upconv(db)
+    sr = concatenate([dl, ub], axis=3)
+    out = testunit(sr, filters=filters)
+
+    return tf.keras.Model(inputs=inputs, outputs=out)
+
+def testmodel(output_channels:int):
+    input_shape = [128, 128, 3]
+    inputs = Input(shape=input_shape)
+
+    bottom = Conv2D(filters=128, kernel_size=4, activation='relu', padding="same")  # 4x4
+    up1 = testlayer([8, 8, 32], bottom, filters=64)
+    up2 = testlayer([16, 16, 16], up1, filters=32)
+    up3 = testlayer([32, 32, 8], up2, filters=16)
+    up4 = testlayer([64, 64, 4], up3, filters=8)
+    top = testlayer(input_shape, up4, filters=4)
+
+    # This is the last layer of the model
+    last = Conv2D(
+        filters=output_channels, kernel_size=3,
+        padding='same')
+
+    out = last(top(inputs))
+
+    return tf.keras.Model(inputs=inputs, outputs=out)
+
+
+
+
+
+def testmodelold2(output_channels:int, config=UnetConfig()):
+    inputs = Input(shape=[128, 128, 3])
+
+    top_layer = _Layer(auto=config)
+    to_features = Conv2D(filters=output_channels, kernel_size=top_layer.left.size, activation='relu', padding="same")
+
+    x = top_layer.call(inputs)
+    out = to_features(x)
+
+    return tf.keras.Model(inputs=inputs, outputs=out)
+
+
+def testmodelold(output_channels:int):
+    inputs = Input(shape=[128, 128, 3])
+
+    conv = Conv2D(filters=3, kernel_size=3, strides=2, activation='relu', padding="same")
+    print(conv(inputs).shape)
+
+    # This is the last layer of the model
+    last = Conv2DTranspose(
+        filters=output_channels, kernel_size=3, strides=2,
+        padding='same')  #64x64 -> 128x128
+
+    out = last(conv(inputs))
+    print(out.shape)
+
+    return tf.keras.Model(inputs=inputs, outputs=out)

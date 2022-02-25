@@ -1,11 +1,12 @@
 import tensorflow as tf
-from Machine_Learning.U_Net.Models import UnetConfig, ClassificationModel, SegmentationModel
+from Machine_Learning_experiments.U_Net.Models import UnetConfig, ClassificationModel, SegmentationModel
 import numpy as np
 
 class Unet:
     def __init__(self, mode="Segmentation", s_dim=1, config=UnetConfig()):
 
         if mode == "Segmentation":
+            print("Segmentation MODE")
             # Create an instance of the model
             self.model = SegmentationModel(dim=s_dim, config=config)
             # Define Loss
@@ -17,6 +18,7 @@ class Unet:
             self.validation_accuracy = tf.keras.metrics.CategoricalAccuracy(name='validation_accuracy')
 
         elif mode == "Classification":
+            print("Classification MODE")
             # Create an instance of the model
             self.model = ClassificationModel(config=config)
             # Define Loss
@@ -78,6 +80,7 @@ class Unet:
             self.validation_step(validate_images, validate_labels)
 
         self.epoch = self.epoch + 1
+
         print(
             f'Epoch {self.epoch}, '
             f'Loss: {self.train_loss.result()}, '

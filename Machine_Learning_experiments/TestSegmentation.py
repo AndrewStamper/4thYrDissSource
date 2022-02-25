@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from Machine_Learning.U_Net.Unet import Unet, UnetConfig
+from Machine_Learning_experiments.U_Net.Unet import Unet, UnetConfig
 from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
 
 mnist = tf.keras.datasets.mnist
