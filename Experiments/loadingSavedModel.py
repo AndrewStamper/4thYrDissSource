@@ -33,3 +33,6 @@ def explore_reloading_models():
 
     # check it has been loaded correctly
     new_ml.evaluate_model()
+
+    validation_data.make_predictions(new_ml)
+    validation_data.display()
