@@ -3,7 +3,14 @@ import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 from imgaug.augmentables.segmaps import SegmentationMapsOnImage
-from Constants import AUGMENTATION_SEED, AUGMENTATION_TYPE_NONE, AUGMENTATION_TYPE_DEMO
+
+AUGMENTATION_SEED = 42
+AUGMENTATION_TYPE_NONE = 0
+AUGMENTATION_TYPE_DEMO = 1
+AUGMENTATION_TYPE_BASIC = 2
+AUGMENTATION_TYPE_MEDIUM = 3
+AUGMENTATION_TYPE_ADVANCED = 4
+AUGMENTATION_TYPE_EXPERIMENTAL = 5
 
 
 class Augmenter(tf.keras.layers.Layer):
@@ -13,6 +20,20 @@ class Augmenter(tf.keras.layers.Layer):
         ia.seed(self.seed)
         if augmentations == AUGMENTATION_TYPE_NONE:
             self.seq = lambda x, y: (x, y)
+        elif augmentations == AUGMENTATION_TYPE_BASIC:
+            self.seq = iaa.Sequential([
+                iaa.Multiply((0.5, 1.5)),
+                iaa.GaussianBlur(sigma=(0.0, 2.0)),
+                iaa.Affine(scale={"x": (0.9, 1.1), "y": (0.9, 1.1)}, translate_percent={"x": (-0.1, 0.1), "y": (-0.1, 0.1)}, rotate=(-15, 15))
+            ], random_order=True)
+        elif augmentations == AUGMENTATION_TYPE_MEDIUM:
+            self.seq = iaa.Sequential([
+                iaa.Multiply((0.5, 1.5)),
+                iaa.GaussianBlur(sigma=(0.0, 2.0)),
+                iaa.Affine(scale={"x": (0.9, 1.1), "y": (0.9, 1.1)}, translate_percent={"x": (-0.1, 0.1), "y": (-0.1, 0.1)}, rotate=(-15, 15)),
+                iaa.Dropout(p=(0, 0.05)),
+                iaa.MultiplyElementwise((0.95, 1.05))
+            ], random_order=True)
         else:  # if == AUGMENTATION_TYPE_DEMO
             if augmentations != AUGMENTATION_TYPE_DEMO:
                 print("Invalid augmentation type chosen, DEMO has been selected")
