@@ -1,10 +1,9 @@
 import tensorflow as tf
 from IPython.display import clear_output
 import matplotlib.pyplot as plt
-from Segmentation.Augmentations import Augmenter
+from Segmentation.Augmentations import Augmenter, AUGMENTATION_TYPE_DEMO, AUGMENTATION_SEED
 from Segmentation.Model import unet_model
-from Constants import BATCH_SIZE, BUFFER_SIZE, OUTPUT_CLASSES, EPOCHS, VAL_SUBSPLITS
-from Constants import AUGMENTATION_SEED, AUGMENTATION_TYPE_DEMO
+from Constants import BATCH_SIZE, BUFFER_SIZE, OUTPUT_CLASSES, EPOCHS, VAL_SUBSPLITS, MODEL_FILE
 
 
 def display(display_list):
@@ -20,13 +19,26 @@ def display(display_list):
 
 
 class ML(tf.keras.layers.Layer):
-    def __init__(self, train_images, validation_images, augmentations_type=AUGMENTATION_TYPE_DEMO, augmentations_seed=AUGMENTATION_SEED):
+    def __init__(self):
+        # setup the model itself
+        self.model = unet_model(output_channels=OUTPUT_CLASSES)
+        self.model.compile(optimizer='adam',
+                           loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                           metrics=['accuracy'])
+        self.model_history = None
+        self.train_num_examples = None
+        self.validation_num_examples = None
+        self.train_batches = None
+        self.validation_batches = None
+        self.sample_image = None
+        self.sample_mask = None
+        self.data_pipeline_training_configured = False
+        self.data_pipeline_validation_configured = False
+
+    def configure_training_data_pipeline(self, train_images, augmentations_type=AUGMENTATION_TYPE_DEMO, augmentations_seed=AUGMENTATION_SEED):
+        self.data_pipeline_training_configured = True
         self.train_num_examples = len(train_images)
-        self.validation_num_examples = len(validation_images)
-
         augmenter = Augmenter(augmentations_type, augmentations_seed)
-
-        # configure batches
         self.train_batches = (
             train_images
                 .cache()
@@ -35,20 +47,17 @@ class ML(tf.keras.layers.Layer):
                 .map(lambda x, y: (augmenter.call(x, y)), num_parallel_calls=tf.data.AUTOTUNE)
                 .batch(BATCH_SIZE)
                 .prefetch(buffer_size=tf.data.AUTOTUNE))
-
-        self.validation_batches = validation_images.batch(BATCH_SIZE)
-
-        # setup the model itself
-        self.model = unet_model(output_channels=OUTPUT_CLASSES)
-        self.model.compile(optimizer='adam',
-                           loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                           metrics=['accuracy'])
-        # tf.keras.utils.plot_modParallelMapDatasetel(self.model, show_shapes=True)
-        self.model_history = None
-
-        # setup sample
         for images, masks in self.train_batches.take(2):
             self.sample_image, self.sample_mask = images[0], masks[0]
+
+    def configure_validation_data_pipeline(self, validation_images):
+        self.validation_num_examples = len(validation_images)
+        self.validation_batches = validation_images.batch(BATCH_SIZE)
+        self.data_pipeline_validation_configured = True
+
+    def verbose(self):
+        # tf.keras.utils.plot_modParallelMapDatasetel(self.model, show_shapes=True)
+        self.model.summary()
 
     @staticmethod
     def create_mask(pred_mask):
@@ -69,20 +78,36 @@ class ML(tf.keras.layers.Layer):
             display([self.sample_image, self.sample_mask])
 
     def train(self):
-        class DisplayCallback(tf.keras.callbacks.Callback):
-            def on_epoch_end(inner_self, epoch, logs=None):
-                clear_output(wait=True)
-                self.display_example(predictions=True, train_data=True, num=1)
-                print('\nSample Prediction after epoch {}\n'.format(epoch+1))
+        if not(self.data_pipeline_validation_configured and self.data_pipeline_training_configured):
+            print("Error; data pipeline is not configured for training")
+        else:
+            class DisplayCallback(tf.keras.callbacks.Callback):
+                def on_epoch_end(inner_self, epoch, logs=None):
+                    clear_output(wait=True)
+                    self.display_example(predictions=True, train_data=True, num=1)
+                    print('\nSample Prediction after epoch {}\n'.format(epoch+1))
 
-        steps_per_epoch = self.train_num_examples // BATCH_SIZE
-        validation_steps = self.validation_num_examples //BATCH_SIZE//VAL_SUBSPLITS
+            steps_per_epoch = self.train_num_examples // BATCH_SIZE
+            validation_steps = self.validation_num_examples //BATCH_SIZE//VAL_SUBSPLITS
 
-        self.model_history = self.model.fit(self.train_batches, epochs=EPOCHS,
-                                            steps_per_epoch=steps_per_epoch,
-                                            validation_steps=validation_steps,
-                                            validation_data=self.validation_batches,
-                                            callbacks=[DisplayCallback()])
+            self.model_history = self.model.fit(self.train_batches, epochs=EPOCHS,
+                                                steps_per_epoch=steps_per_epoch,
+                                                validation_steps=validation_steps,
+                                                validation_data=self.validation_batches,
+                                                callbacks=[DisplayCallback()])
+
+    def evaluate_model(self):
+        if not(self.data_pipeline_validation_configured):
+            print("Error; data pipeline is not configured for evaluation")
+        else:
+            loss, acc = self.model.evaluate(self.validation_batches, batch_size=BATCH_SIZE, verbose=2)
+            print("accuracy: {:5.2f}%".format(100 * acc))
+
+    def save_model(self, filename, location=MODEL_FILE):
+        self.model.save_weights(location + filename)
+
+    def load_model(self, filename, location=MODEL_FILE):
+        self.model.load_weights(location + filename)
 
     def show_epoch_progression(self):
         loss = self.model_history.history['loss']
