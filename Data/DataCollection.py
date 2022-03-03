@@ -2,6 +2,7 @@ from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
 from ImageClasses.Masks.AnnotationsMask import MaskCollection
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 
 # pair of ground truth masks and their corresponding ultrasound scan
@@ -11,6 +12,7 @@ class _Scan:
         self.predictions_only = predictions_only
         if not self.predictions_only:
             self.ground_truth = MaskCollection(scan_number)
+            self.predicted_mask = None
 
     def crop(self, shape):
         self.ultrasound_scan.crop(shape)
@@ -21,6 +23,29 @@ class _Scan:
         self.ultrasound_scan = self.ultrasound_scan.down_sample(shape)
         if not self.predictions_only:
             self.ground_truth.down_sample(shape)
+
+    def make_prediction(self, segmentation_machine_learning):
+        x = np.zeros((*self.ultrasound_scan.image_3d.shape, 3))
+        x[:, :, 0] = self.ultrasound_scan.image_3d
+        self.predicted_mask = MaskCollection(generated_mask=segmentation_machine_learning.make_prediction(x))
+
+    def display(self):
+        plt.figure(figsize=(15, 15))
+        title = ['Input Image', 'True Mask', 'Predicted Mask', 'illium difference', 'femoral head difference', 'labrum difference']
+
+        display_list = [self.ultrasound_scan.image_3d.reshape((*self.ultrasound_scan.image_3d.shape, 1))]
+        if not self.predictions_only:
+            display_list.append(self.ground_truth.as_RGB())
+            if self.predicted_mask is not None:
+                display_list.append(self.predicted_mask.as_RGB())
+                display_list = display_list + self.ground_truth.difference_masks(self.predicted_mask)
+
+        for i in range(len(display_list)):
+            plt.subplot(2, len(display_list)//2, i+1)
+            plt.title(title[i])
+            plt.imshow(tf.keras.utils.array_to_img(display_list[i]))
+            plt.axis('off')
+        plt.show()
 
 
 # each object of this type will be a set of scans and their corresponding masks
@@ -60,3 +85,12 @@ class ScanCollection:
 
         dataset = tf.data.Dataset.from_tensor_slices((x, y))
         return dataset
+
+    def make_predictions(self, segmentation_machine_learning):
+        for scan in self.scans:
+            scan.make_prediction(segmentation_machine_learning)
+
+    def display(self):
+        for scan in self.scans:
+            scan.display()
+
