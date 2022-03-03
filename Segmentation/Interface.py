@@ -88,7 +88,7 @@ class ML(tf.keras.layers.Layer):
                     print('\nSample Prediction after epoch {}\n'.format(epoch+1))
 
             steps_per_epoch = self.train_num_examples // BATCH_SIZE
-            validation_steps = self.validation_num_examples //BATCH_SIZE//VAL_SUBSPLITS
+            validation_steps = self.validation_num_examples // BATCH_SIZE//VAL_SUBSPLITS
 
             self.model_history = self.model.fit(self.train_batches, epochs=EPOCHS,
                                                 steps_per_epoch=steps_per_epoch,

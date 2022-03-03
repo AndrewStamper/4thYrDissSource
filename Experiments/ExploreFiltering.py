@@ -34,4 +34,3 @@ def explore_filtering(scan_number):
     file_number = file_number + 1
 
     progression.plot_as_3d(file_name + str(file_number) + '_3D_surface_of_scan.html')
-    file_number = file_number + 1

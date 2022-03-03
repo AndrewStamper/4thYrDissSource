@@ -93,4 +93,3 @@ class ScanCollection:
     def display(self):
         for scan in self.scans:
             scan.display()
-
