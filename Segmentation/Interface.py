@@ -97,11 +97,14 @@ class ML(tf.keras.layers.Layer):
                                                 callbacks=[DisplayCallback()])
 
     def evaluate_model(self):
-        if not(self.data_pipeline_validation_configured):
+        if not self.data_pipeline_validation_configured:
             print("Error; data pipeline is not configured for evaluation")
         else:
             loss, acc = self.model.evaluate(self.validation_batches, batch_size=BATCH_SIZE, verbose=2)
             print("accuracy: {:5.2f}%".format(100 * acc))
+
+    def make_prediction(self, image):
+        return self.create_mask(self.model.predict(image[tf.newaxis, ...]))
 
     def save_model(self, filename, location=MODEL_FILE):
         self.model.save_weights(location + filename)
