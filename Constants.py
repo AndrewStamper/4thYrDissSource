@@ -1,7 +1,13 @@
+import Segmentation.Augmentations as Aug
+
 # Directory locations
 OUTPUT_FILE = "../output/"
 IMAGE_FILE = "../AlderHayUltrasounds/"
 MASK_FILE = "../Alder_Hey_Masks/"
+MODEL_FILE = "../Trained_Tensorflow_Models/"
+
+SAVED_MODEL = "Trained_Model"
+SAVE_MODEL_AS = "Trained_Modelv2"
 
 # Colour constants
 RGB_TO_BRIGHTNESS = [0.21, 0.72, 0.07]
@@ -20,12 +26,10 @@ CROP_SHAPE = (384, 384)
 INPUT_SHAPE = (128, 128)
 
 # Augmentation
-AUGMENTATION_SEED = 42
-AUGMENTATION_TYPE_NONE = 0
-AUGMENTATION_TYPE_DEMO = 1
+AUGMENTATION_TYPE = Aug.AUGMENTATION_TYPE_MEDIUM
 
 BATCH_SIZE = 4
 BUFFER_SIZE = 1000
 OUTPUT_CLASSES = 4
-EPOCHS = 20
+EPOCHS = 30
 VAL_SUBSPLITS = 1
