@@ -1,9 +1,9 @@
 import tensorflow as tf
-from IPython.display import clear_output
 import matplotlib.pyplot as plt
-from Segmentation.Augmentations import Augmenter, AUGMENTATION_TYPE_DEMO, AUGMENTATION_SEED
+import Constants as CONST
+from IPython.display import clear_output
+from Segmentation.Augmentations.Augmentations import Augmenter, AUGMENTATION_TYPE_DEMO
 from Segmentation.Model import unet_model
-from Constants import BATCH_SIZE, BUFFER_SIZE, OUTPUT_CLASSES, EPOCHS, VAL_SUBSPLITS, MODEL_FILE
 
 
 def display(display_list):
@@ -21,7 +21,7 @@ def display(display_list):
 class ML(tf.keras.layers.Layer):
     def __init__(self):
         # setup the model itself
-        self.model = unet_model(output_channels=OUTPUT_CLASSES)
+        self.model = unet_model(output_channels=CONST.OUTPUT_CLASSES)
         self.model.compile(optimizer='adam',
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])
@@ -35,24 +35,24 @@ class ML(tf.keras.layers.Layer):
         self.data_pipeline_training_configured = False
         self.data_pipeline_validation_configured = False
 
-    def configure_training_data_pipeline(self, train_images, augmentations_type=AUGMENTATION_TYPE_DEMO, augmentations_seed=AUGMENTATION_SEED):
+    def configure_training_data_pipeline(self, train_images, augmentations_type=AUGMENTATION_TYPE_DEMO, augmentations_seed=CONST.AUGMENTATION_SEED):
         self.data_pipeline_training_configured = True
         self.train_num_examples = len(train_images)
         augmenter = Augmenter(augmentations_type, augmentations_seed)
         self.train_batches = (
             train_images
                 .cache()
-                .shuffle(BUFFER_SIZE)
+                .shuffle(CONST.BUFFER_SIZE)
                 .repeat()
                 .map(lambda x, y: (augmenter.call(x, y)), num_parallel_calls=tf.data.AUTOTUNE)
-                .batch(BATCH_SIZE)
+                .batch(CONST.BATCH_SIZE)
                 .prefetch(buffer_size=tf.data.AUTOTUNE))
         for images, masks in self.train_batches.take(2):
             self.sample_image, self.sample_mask = images[0], masks[0]
 
     def configure_validation_data_pipeline(self, validation_images):
         self.validation_num_examples = len(validation_images)
-        self.validation_batches = validation_images.batch(BATCH_SIZE)
+        self.validation_batches = validation_images.batch(CONST.BATCH_SIZE)
         self.data_pipeline_validation_configured = True
 
     def verbose(self):
@@ -87,10 +87,10 @@ class ML(tf.keras.layers.Layer):
                     self.display_example(predictions=True, train_data=True, num=1)
                     print('\nSample Prediction after epoch {}\n'.format(epoch+1))
 
-            steps_per_epoch = self.train_num_examples // BATCH_SIZE
-            validation_steps = self.validation_num_examples // BATCH_SIZE//VAL_SUBSPLITS
+            steps_per_epoch = self.train_num_examples // CONST.BATCH_SIZE
+            validation_steps = self.validation_num_examples // CONST.BATCH_SIZE//CONST.VAL_SUBSPLITS
 
-            self.model_history = self.model.fit(self.train_batches, epochs=EPOCHS,
+            self.model_history = self.model.fit(self.train_batches, epochs=CONST.EPOCHS,
                                                 steps_per_epoch=steps_per_epoch,
                                                 validation_steps=validation_steps,
                                                 validation_data=self.validation_batches,
@@ -100,16 +100,16 @@ class ML(tf.keras.layers.Layer):
         if not self.data_pipeline_validation_configured:
             print("Error; data pipeline is not configured for evaluation")
         else:
-            loss, acc = self.model.evaluate(self.validation_batches, batch_size=BATCH_SIZE, verbose=2)
+            loss, acc = self.model.evaluate(self.validation_batches, batch_size=CONST.BATCH_SIZE, verbose=2)
             print("accuracy: {:5.2f}%".format(100 * acc))
 
     def make_prediction(self, image):
         return self.create_mask(self.model.predict(image[tf.newaxis, ...]))
 
-    def save_model(self, filename, location=MODEL_FILE):
+    def save_model(self, filename, location=CONST.MODEL_FILE):
         self.model.save_weights(location + filename)
 
-    def load_model(self, filename, location=MODEL_FILE):
+    def load_model(self, filename, location=CONST.MODEL_FILE):
         self.model.load_weights(location + filename)
 
     def show_epoch_progression(self):
