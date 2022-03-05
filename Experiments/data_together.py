@@ -42,7 +42,7 @@ def explore_image_segmentation():
     validation_data = ScanCollection(validation_scan_numbers)
 
     # crop data
-    training_data.crop(CROP_SHAPE)
+    training_data.crop(TRAINING_CROP_SHAPE)
     validation_data.crop(CROP_SHAPE)
     training_data.max_pool((3, 3))
     validation_data.max_pool((3, 3))
