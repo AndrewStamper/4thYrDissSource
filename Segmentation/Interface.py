@@ -82,10 +82,12 @@ class ML(tf.keras.layers.Layer):
             print("Error; data pipeline is not configured for training")
         else:
             class DisplayCallback(tf.keras.callbacks.Callback):
-                def on_epoch_end(inner_self, epoch, logs=None):
+                @staticmethod
+                def on_epoch_end(epoch, logs=None):
                     clear_output(wait=True)
-                    self.display_example(predictions=True, train_data=True, num=1)
-                    print('\nSample Prediction after epoch {}\n'.format(epoch+1))
+                    if (epoch + 1) % CONST.NUM_EPOCH_PRINT_CALLBACK == 0:
+                        print('\nSample Prediction after epoch {}\n'.format(epoch+1))
+                        self.display_example(predictions=True, train_data=True, num=1)
 
             steps_per_epoch = self.train_num_examples // CONST.BATCH_SIZE
             validation_steps = self.validation_num_examples // CONST.BATCH_SIZE//CONST.VAL_SUBSPLITS
