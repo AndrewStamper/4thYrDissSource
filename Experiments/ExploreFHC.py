@@ -7,9 +7,10 @@ from Experiments.DataSplits import *
 
 
 def explore_FHC(scan_number):
-    scan = SingleScan(scan_number)
-    calc = scan.calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=False, precise=False)
-    oracle = check_oracle_fhc(scan_number, precise=False)
+    print("A042R")
+    scan = SingleScan("A042R")
+    calc = scan.calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=True, precise=False)
+    oracle = check_oracle_fhc("A042R", precise=False)
     print("calculated: " + str(calc) + " oracle: " + str(oracle))
 
     # load data into my format
@@ -32,6 +33,10 @@ def explore_FHC(scan_number):
 
     # make predictions and calculate FHC
     validation_data.make_predictions(new_ml)
+
+    print("using ground truth masks")
+    validation_data.calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=False, precise=False)
+    print("using prediced masks")
     validation_data.calculate_fhc(mask=MASK_PREDICTED, verbose=False, precise=False)
 
     validation_data.display(["A042R", "A043L", "A045R", "A047L"])
