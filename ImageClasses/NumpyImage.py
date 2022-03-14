@@ -2,6 +2,8 @@ from Constants import *
 from PIL import Image
 import numpy as np
 import os
+import tensorflow as tf
+import matplotlib.pyplot as plt
 
 
 class NumpyImage:
@@ -54,7 +56,10 @@ class NumpyImage:
         self.image_3d = self.restrict_to_box(corner_top_left, corner_bottom_right).image_3d
 
     # print it
-    def write_image(self, filename):
+    def write_image(self, filename, image=None):
+        if image is None:
+            image = self.image_3d
+
         # Function to read the write numpy array of rows*columns*pixels to a png
         if filename[-4:] != '.png':
             filename = filename+'.png'
@@ -91,3 +96,16 @@ class NumpyImage:
     # print
     def to_string(self):
         return self.image_3d
+
+    def plot(self, image=None, title="Image_3d"):
+        if image is None:
+            image = self.image_3d
+
+        if image.ndim == 2:
+            image = np.expand_dims(image, axis=2)
+
+        plt.figure(figsize=(15, 15))
+        plt.title('title')
+        plt.imshow(tf.keras.utils.array_to_img(image))
+        plt.axis('off')
+        plt.show()
