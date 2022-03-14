@@ -1,23 +1,12 @@
-from Data.DataCollection import ScanCollection
+from Data.DataCollection import ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED
 from Segmentation.Interface import ML
 from Constants import *
+from Experiments.DataSplits import *
 
 
 def explore_reloading_models():
-    validation_scan_numbers = []
-
-    for number in range(40, 50):
-        for letter in ["L","R"]:
-            if number < 10:
-                tnumber = "0" + str(number)
-            else:
-                tnumber = str(number)
-            validation_scan_numbers.append("A0" + tnumber + letter)
-
-    validation_scan_numbers.remove("A041R")
-
     # load data into my format
-    validation_data = ScanCollection(validation_scan_numbers)
+    validation_data = ScanCollection(validation_data_list())
 
     # crop data
     validation_data.crop(CROP_SHAPE)
@@ -34,5 +23,6 @@ def explore_reloading_models():
     # check it has been loaded correctly
     new_ml.evaluate_model()
 
+    # make predictions
     validation_data.make_predictions(new_ml)
     validation_data.display()

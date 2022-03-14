@@ -1,45 +1,14 @@
 from Data.DataCollection import ScanCollection
 from Segmentation.Interface import ML
 from Constants import *
+from Experiments.DataSplits import *
 
 
 def explore_image_segmentation():
-    # load data
-    # training_scan_numbers = ["A001L", "A002L",
-    #                          "A021R", "A023R", "A024L", "A024R", "A026L",
-    #                          "A030L", "A032L", "A032R", "A034L",
-    #                          "A044R", "A045R", "A046R",
-    #                          "A052R", "A053L"]
-    # validation_scan_numbers = ["A001R", "A003L",
-    #                            "A022R", "A030R", "A055L"]
-
-    training_scan_numbers = []
-    validation_scan_numbers = []
-
-    for number in range(1, 40):
-        for letter in ["L", "R"]:
-            if number < 10:
-                t_number = "0" + str(number)
-            else:
-                t_number = str(number)
-            training_scan_numbers.append("A0" + t_number + letter)
-
-    training_scan_numbers.remove("A005R")
-    training_scan_numbers.remove("A018R")
-
-    for number in range(40, 50):
-        for letter in ["L", "R"]:
-            if number < 10:
-                t_number = "0" + str(number)
-            else:
-                t_number = str(number)
-            validation_scan_numbers.append("A0" + t_number + letter)
-
-    validation_scan_numbers.remove("A041R")
 
     # load data into my format
-    training_data = ScanCollection(training_scan_numbers)
-    validation_data = ScanCollection(validation_scan_numbers)
+    training_data = ScanCollection(training_data_list())
+    validation_data = ScanCollection(validation_data_list())
 
     # crop data
     training_data.crop(TRAINING_CROP_SHAPE)
