@@ -1,28 +1,42 @@
 from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
 from ImageClasses.Masks.AnnotationsMask import MaskCollection
+from ImageClasses.Points.AbhiAnnotationPoints import AbhiAnnotationPointScan
+from FHC.MaskToPoints import find_extrema
+from FHC.Oracle import check_oracle_fhc
+from FHC.Calculate import *
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+MASK_GROUND_TRUTH = 0
+MASK_PREDICTED = 1
 
-# pair of ground truth masks and their corresponding ultrasound scan
-class _Scan:
+
+# masks and their corresponding ultrasound scan
+class SingleScan:
     def __init__(self, scan_number, predictions_only=False):
         self.ultrasound_scan = UltrasoundScan(filename=(scan_number + ".jpg"))
         self.predictions_only = predictions_only
+        self.predicted_mask = None
         if not self.predictions_only:
+            self.points = AbhiAnnotationPointScan(filename=(scan_number + "_g.png"))
             self.ground_truth = MaskCollection(scan_number)
-            self.predicted_mask = None
 
     def crop(self, shape):
         self.ultrasound_scan.crop(shape)
         if not self.predictions_only:
             self.ground_truth.crop(shape)
+            self.points.crop(shape)
+        if self.predicted_mask is not None:
+            self.predicted_mask.crop(shape)
 
     def max_pool(self, shape):
         self.ultrasound_scan = self.ultrasound_scan.down_sample(shape)
         if not self.predictions_only:
             self.ground_truth.down_sample(shape)
+            self.points.down_sample(shape)
+        if self.predicted_mask is not None:
+            self.predicted_mask.down_sample(shape)
 
     def make_prediction(self, segmentation_machine_learning):
         x = np.zeros((*self.ultrasound_scan.image_3d.shape, 3))
@@ -31,21 +45,39 @@ class _Scan:
 
     def display(self):
         plt.figure(figsize=(15, 15))
-        title = ['Input Image', 'True Mask', 'Predicted Mask', 'illium difference', 'femoral head difference', 'labrum difference']
+        title_list = ['Input Image']
 
         display_list = [self.ultrasound_scan.image_3d.reshape((*self.ultrasound_scan.image_3d.shape, 1))]
         if not self.predictions_only:
-            display_list.append(self.ground_truth.as_RGB())
-            if self.predicted_mask is not None:
-                display_list.append(self.predicted_mask.as_RGB())
-                display_list = display_list + self.ground_truth.difference_masks(self.predicted_mask)
+            display_list = display_list + [self.ground_truth.as_RGB(), self.points.produce_point_image()]
+            title_list = title_list + ["True Mask", "points"]
+        if self.predicted_mask is not None:
+            display_list.append(self.predicted_mask.as_RGB())
+            title_list.append("Predicted Mask")
+        if (self.predicted_mask is not None) and (not self.predictions_only):
+            display_list = display_list + self.ground_truth.difference_masks(self.predicted_mask)
+            title_list = title_list + ['illium difference', 'femoral head difference', 'labrum difference']
 
         for i in range(len(display_list)):
-            plt.subplot(2, len(display_list)//2, i+1)
-            plt.title(title[i])
+            plt.subplot(3, 3, i+1)
+            plt.title(title_list[i])
             plt.imshow(tf.keras.utils.array_to_img(display_list[i]))
             plt.axis('off')
         plt.show()
+
+    def calculate_fhc(self, mask=MASK_PREDICTED, verbose=False, precise=False):
+        if mask is MASK_GROUND_TRUTH:
+            mask = self.ground_truth
+        elif mask is MASK_PREDICTED:
+            assert(self.predicted_mask is not None)
+            mask = self.predicted_mask
+        else:
+            print("mask type unsupported, defaulting to predicted mask")
+            assert(self.predicted_mask is not None)
+            mask = self.predicted_mask
+
+        femoral_head_point_bottom, femoral_head_point_top = find_extrema(mask)
+        return fhc(self.points.illium_t_l_point(), self.points.illium_t_r_point(), femoral_head_point_bottom, femoral_head_point_top, verbose=verbose, precise=precise)
 
 
 # each object of this type will be a set of scans and their corresponding masks
@@ -53,7 +85,7 @@ class ScanCollection:
     def __init__(self, scan_numbers, predictions_only=False):
         self.predictions_only = predictions_only
         self.scan_numbers = np.asarray(scan_numbers)
-        v_scans = np.vectorize(lambda a: _Scan(a, predictions_only=predictions_only))
+        v_scans = np.vectorize(lambda a: SingleScan(a, predictions_only=predictions_only))
         self.scans = v_scans(self.scan_numbers)
 
     def number_of_scans(self):
@@ -90,6 +122,29 @@ class ScanCollection:
         for scan in self.scans:
             scan.make_prediction(segmentation_machine_learning)
 
-    def display(self):
-        for scan in self.scans:
-            scan.display()
+    def display(self, display_list=None):
+        if display_list is None:
+            for scan in self.scans:
+                scan.display()
+        else:
+            for elem in display_list:
+                num_list = np.argwhere(self.scan_numbers == elem)
+                if num_list.size == 0:
+                    print("Scan number : " + str(elem) + " is not found in this scan collection, cannot print")
+                else:
+                    self.scans[num_list[0][0]].display()
+
+    def calculate_fhc(self, mask=MASK_PREDICTED, verbose=False, precise=False):
+        error_log = ""
+        incorrect_guess = 0
+        for i in range(0, len(self.scan_numbers)):
+            calc = self.scans[i].calculate_fhc(mask=mask, verbose=verbose, precise=precise)
+            oracle = check_oracle_fhc(self.scan_numbers[i], precise=precise)
+            if calc != oracle:
+                error_log += str(self.scan_numbers[i]) + " : " + str(calc) + " : " + str(oracle) + "\n"
+                incorrect_guess += 1
+
+        correct_guess = len(self.scan_numbers) - incorrect_guess
+        print("Correct FHC: " + str(correct_guess) + " Incorrect FHC: " + str(incorrect_guess) + " Accuracy: " + str(correct_guess/(incorrect_guess + correct_guess)))
+        print(error_log)
+
