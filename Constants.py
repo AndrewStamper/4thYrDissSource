@@ -2,8 +2,8 @@ import Segmentation.Augmentations.Augmentation_Constants as Aug
 
 # Directory locations
 OUTPUT_FILE = "../output/"
-IMAGE_FILE = "../AlderHayUltrasounds/"
-MASK_FILE = "../Alder_Hey_Masks/"
+IMAGE_FILE = "../Alder_Hey_Ultrasounds/"
+MASK_FILE = "../Alder_Hey_Ground_truths/"
 MODEL_FILE = "../Trained_Tensorflow_Models/"
 
 SAVED_MODEL = "Trained_Model"
@@ -22,7 +22,7 @@ RGBA_TRANSLUCENT = [0, 0, 0, 10]
 POINT_SIZE = 5
 
 # Machine learning
-TRAINING_CROP_SHAPE = (420, 500)
+TRAINING_CROP_SHAPE = (435, 550)
 CROP_SHAPE = (384, 384)
 INPUT_SHAPE = (128, 128)
 
