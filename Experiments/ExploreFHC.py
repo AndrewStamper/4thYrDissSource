@@ -1,16 +1,15 @@
-from Data.DataCollection import SingleScan, MASK_GROUND_TRUTH
+from Data.DataCollection import SingleScan, ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED
 from FHC.Oracle import check_oracle_fhc
-from Data.DataCollection import ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED
 from Segmentation.Interface import ML
 from Constants import *
 from Experiments.DataSplits import *
 
 
 def explore_FHC(scan_number):
-    print("A042R")
-    scan = SingleScan("A042R")
+    print(scan_number)
+    scan = SingleScan(scan_number)
     calc = scan.calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=True, precise=False)
-    oracle = check_oracle_fhc("A042R", precise=False)
+    oracle = check_oracle_fhc(scan_number, precise=False)
     print("calculated: " + str(calc) + " oracle: " + str(oracle))
 
     # load data into my format

@@ -1,7 +1,7 @@
 from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
 from ImageClasses.Masks.AnnotationsMask import MaskCollection
 from ImageClasses.Points.AbhiAnnotationPoints import AbhiAnnotationPointScan
-from FHC.MaskToPoints import find_extrema
+from FHC.MaskToPoints import *
 from FHC.Oracle import check_oracle_fhc
 from FHC.Calculate import *
 import numpy as np
@@ -15,6 +15,7 @@ MASK_PREDICTED = 1
 # masks and their corresponding ultrasound scan
 class SingleScan:
     def __init__(self, scan_number, predictions_only=False):
+        self.scan_number = scan_number
         self.ultrasound_scan = UltrasoundScan(filename=(scan_number + ".jpg"))
         self.predictions_only = predictions_only
         self.predicted_mask = None
@@ -45,7 +46,7 @@ class SingleScan:
 
     def display(self):
         plt.figure(figsize=(15, 15))
-        title_list = ['Input Image']
+        title_list = [str(self.scan_number)]
 
         display_list = [self.ultrasound_scan.image_3d.reshape((*self.ultrasound_scan.image_3d.shape, 1))]
         if not self.predictions_only:
@@ -76,7 +77,7 @@ class SingleScan:
             assert(self.predicted_mask is not None)
             mask = self.predicted_mask
 
-        femoral_head_point_bottom, femoral_head_point_top = find_extrema(mask)
+        femoral_head_point_bottom, femoral_head_point_top = walk_to_extrema(mask) #find_extrema(mask)
         return fhc(self.points.illium_t_l_point(), self.points.illium_t_r_point(), femoral_head_point_bottom, femoral_head_point_top, verbose=verbose, precise=precise)
 
 
