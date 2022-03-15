@@ -6,8 +6,10 @@ IMAGE_FILE = "../Alder_Hey_Ultrasounds/"
 MASK_FILE = "../Alder_Hey_Ground_truths/"
 MODEL_FILE = "../Trained_Tensorflow_Models/"
 
-SAVED_MODEL = "Trained_Model"
-SAVE_MODEL_AS = "Trained_Modelv2"
+SAVED_MODEL = "Trained_Modelv2"
+SAVE_MODEL_AS = "Trained_Modelv3"
+# "Trained_Model" # trained on 30 examples 97.5% accuracy but produces 'fuzzy' edges
+# "Trained_Modelv2" # trained on 300 examples 98\% accuracy and produces 'human-like' edges
 
 # Colour constants
 RGB_TO_BRIGHTNESS = [0.21, 0.72, 0.07]
@@ -34,5 +36,6 @@ BATCH_SIZE = 4
 BUFFER_SIZE = 1000
 OUTPUT_CLASSES = 4
 EPOCHS = 300
+# 10 epochs per min
 NUM_EPOCH_PRINT_CALLBACK = 30
 VAL_SUBSPLITS = 1
