@@ -1,4 +1,4 @@
-from Data.DataCollection import ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED
+from Data.DataCollection import ScanCollection
 from Segmentation.Interface import ML
 from Constants import *
 from Experiments.DataSplits import *
