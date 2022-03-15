@@ -45,22 +45,22 @@ class SingleScan:
         self.predicted_mask = MaskCollection(generated_mask=segmentation_machine_learning.make_prediction(x))
 
     def display(self):
-        plt.figure(figsize=(15, 15))
-        title_list = [str(self.scan_number)]
+        fig = plt.figure(figsize=(15, 15))
+        title_list = [(str(self.scan_number) + " Ultrasound Scan")]
 
         display_list = [self.ultrasound_scan.image_3d.reshape((*self.ultrasound_scan.image_3d.shape, 1))]
         if not self.predictions_only:
             display_list = display_list + [self.ground_truth.as_RGB(), self.points.produce_point_image()]
-            title_list = title_list + ["True Mask", "points"]
+            title_list = title_list + ["Ground Truth Mask", "Ground Truth Points"]
         if self.predicted_mask is not None:
             display_list.append(self.predicted_mask.as_RGB())
-            title_list.append("Predicted Mask")
+            title_list.append("Algorithm Generated Mask")
         if (self.predicted_mask is not None) and (not self.predictions_only):
             display_list = display_list + self.ground_truth.difference_masks(self.predicted_mask)
-            title_list = title_list + ['illium difference', 'femoral head difference', 'labrum difference']
+            title_list = title_list + ['Illium difference', 'Femoral Head difference', 'Labrum difference']
 
         for i in range(len(display_list)):
-            plt.subplot(3, 3, i+1)
+            subfig = plt.subplot(3, 3, i+1)
             plt.title(title_list[i])
             plt.imshow(tf.keras.utils.array_to_img(display_list[i]))
             plt.axis('off')
@@ -77,7 +77,7 @@ class SingleScan:
             assert(self.predicted_mask is not None)
             mask = self.predicted_mask
 
-        femoral_head_point_bottom, femoral_head_point_top = walk_to_extrema(mask) #find_extrema(mask)
+        femoral_head_point_bottom, femoral_head_point_top = walk_to_extrema(mask)
         return fhc(self.points.illium_t_l_point(), self.points.illium_t_r_point(), femoral_head_point_bottom, femoral_head_point_top, verbose=verbose, precise=precise)
 
 

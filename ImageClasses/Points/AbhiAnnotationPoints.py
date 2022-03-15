@@ -75,7 +75,7 @@ class AbhiAnnotationPointScan(NumpyImage):
                     if((y * y) + (x * x) <= POINT_SIZE*POINT_SIZE) and ((self.points[index, 0] + y) >= 0) and ((self.points[index, 1] + x) >= 0):
                         output_image[self.points[index, 0] + y, self.points[index, 1] + x] = colours[index]
 
-        return output_image
+        return output_image[:, :, 0:3]
 
     def crop(self, shape):
         difference = np.subtract(self.image_3d.shape[:2], shape)
