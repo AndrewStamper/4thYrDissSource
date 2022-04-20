@@ -2,7 +2,7 @@ from Data.DataCollection import SingleScan, ScanCollection, MASK_GROUND_TRUTH, M
 from FHC.Oracle import check_oracle_fhc
 from Segmentation.Interface import ML
 from Constants import *
-from Experiments.DataSplits import *
+from Data.DataSplits import *
 
 
 def explore_FHC(scan_number):
@@ -17,7 +17,7 @@ def explore_FHC(scan_number):
 
     # crop data
     validation_data.crop(CROP_SHAPE)
-    validation_data.max_pool((3, 3))
+    validation_data.max_pool(DOWN_SAMPLE_SHAPE)
 
     # convert data into format for tensorflow
     validation_dataset = validation_data.load_data()
@@ -33,10 +33,8 @@ def explore_FHC(scan_number):
     # make predictions and calculate FHC
     validation_data.make_predictions(new_ml)
 
-    print("using ground truth masks")
-    validation_data.calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=False, precise=False)
-    print("using prediced masks")
-    validation_data.calculate_fhc(mask=MASK_PREDICTED, verbose=False, precise=False)
+    print("FHC using predicted masks")
+    validation_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)
 
-    validation_data.display(["A042R", "A043L", "A045R", "A047L"])
+    validation_data.display()# ["A072R", "A079L", "A045R"]
 
