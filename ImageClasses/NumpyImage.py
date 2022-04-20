@@ -4,6 +4,7 @@ import numpy as np
 import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import math
 
 
 class NumpyImage:
@@ -44,16 +45,24 @@ class NumpyImage:
 
     # crop an image to a selected size
     def crop(self, shape):
-        # print("image dimensions: " + str(self.image_3d.shape))
-        difference = np.subtract(self.image_3d.shape, shape)
-        if not(np.all(difference > 0)):
-            print("image dimensions: " + str(self.image_3d.shape))
-            print("crop dimensions: " + str(shape))
-            raise ValueError("cropping to a image size larger than the original image")
+        crop_shape = []
+        padding = []
+        for i in range(0, len(self.image_3d.shape)):
+            if (self.image_3d.shape[i]-shape[i]) >= 0:
+                crop_shape.append(shape[i])
+                padding.append((0, 0))
+            else:
+                crop_shape.append(self.image_3d.shape[i])
+                total_to_pad = shape[i] - self.image_3d.shape[i]
+                lhs = math.floor(total_to_pad/2)
+                rhs = total_to_pad - lhs
+                padding.append((lhs, rhs))
 
+        difference = np.subtract(self.image_3d.shape, crop_shape)
         corner_top_left = np.int64(np.floor(difference/2))
         corner_bottom_right = np.subtract(self.image_3d.shape, difference - corner_top_left)
-        self.image_3d = self.restrict_to_box(corner_top_left, corner_bottom_right).image_3d
+        cropped_image = self.restrict_to_box(corner_top_left, corner_bottom_right).image_3d
+        self.image_3d = np.pad(cropped_image, padding, 'constant')
 
     # print it
     def write_image(self, filename, image=None):

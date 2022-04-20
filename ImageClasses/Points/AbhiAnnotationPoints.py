@@ -1,6 +1,7 @@
 from ImageClasses.NumpyImage import NumpyImage
 from Constants import *
 import numpy as np
+import math
 
 illium_t_l = 0
 illium_t_r = 1
@@ -78,15 +79,22 @@ class AbhiAnnotationPointScan(NumpyImage):
         return output_image[:, :, 0:3]
 
     def crop(self, shape):
-        difference = np.subtract(self.image_3d.shape[:2], shape)
-        if not(np.all(difference > 0)):
-            print("image dimensions: " + str(self.image_3d.shape))
-            print("crop dimensions: " + str(shape))
-            raise ValueError("cropping to a image size larger than the original image")
+        crop_shape = []
+        padding = []
+        for i in range(0, len(self.image_3d.shape[:2])):
+            if (self.image_3d.shape[i]-shape[i]) >= 0:
+                crop_shape.append(shape[i])
+                padding.append(0)
+            else:
+                crop_shape.append(self.image_3d.shape[i])
+                total_to_pad = shape[i] - self.image_3d.shape[i]
+                lhs = math.floor(total_to_pad/2)
+                padding.append(lhs)
 
+        difference = np.subtract(self.image_3d.shape[:2], crop_shape)
         corner_top_left = np.int64(np.floor(difference/2))
         for i in range(0, len(self.points)):
-            self.points[i] = self.points[i] - corner_top_left
+            self.points[i] = self.points[i] - corner_top_left + padding
         self.image_3d = np.zeros(shape)
 
     def down_sample(self, shape):
