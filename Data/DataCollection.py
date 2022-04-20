@@ -1,15 +1,21 @@
 from ImageClasses.Ultrasound.UltrasoundScan import UltrasoundScan
 from ImageClasses.Masks.AnnotationsMask import MaskCollection
 from ImageClasses.Points.AbhiAnnotationPoints import AbhiAnnotationPointScan
-from FHC.MaskToPoints import *
+from FHC.MaskToFemoralPoints import *
+from FHC.MaskToIlliumPoints import *
 from FHC.Oracle import check_oracle_fhc
 from FHC.Calculate import *
+from Constants import FHC_ILLIUM_STEP
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
 MASK_GROUND_TRUTH = 0
 MASK_PREDICTED = 1
+DDH_ORACLE = 2
+
+GENERATED_POINTS = 0
+ANNOTATION_POINTS = 1
 
 
 # masks and their corresponding ultrasound scan
@@ -55,6 +61,8 @@ class SingleScan:
         if self.predicted_mask is not None:
             display_list.append(self.predicted_mask.as_RGB())
             title_list.append("Algorithm Generated Mask")
+            display_list.append(find_upper_with_stopping(self.predicted_mask, FHC_ILLIUM_STEP))
+            title_list.append("Upper Illium")
         if (self.predicted_mask is not None) and (not self.predictions_only):
             display_list = display_list + self.ground_truth.difference_masks(self.predicted_mask)
             title_list = title_list + ['Illium difference', 'Femoral Head difference', 'Labrum difference']
@@ -66,7 +74,7 @@ class SingleScan:
             plt.axis('off')
         plt.show()
 
-    def calculate_fhc(self, mask=MASK_PREDICTED, verbose=False, precise=False):
+    def calculate_fhc(self, mask=MASK_PREDICTED, illium=GENERATED_POINTS, verbose=False, precise=False):
         if mask is MASK_GROUND_TRUTH:
             mask = self.ground_truth
         elif mask is MASK_PREDICTED:
@@ -78,7 +86,14 @@ class SingleScan:
             mask = self.predicted_mask
 
         femoral_head_point_bottom, femoral_head_point_top = walk_to_extrema(mask)
-        return fhc(self.points.illium_t_l_point(), self.points.illium_t_r_point(), femoral_head_point_bottom, femoral_head_point_top, verbose=verbose, precise=precise)
+
+        if illium == GENERATED_POINTS:
+            point_1_illium, point_2_illium = illium_points(mask, FHC_ILLIUM_STEP)
+        else:
+            point_1_illium = self.points.illium_t_l_point()
+            point_2_illium = self.points.illium_t_r_point()
+
+        return fhc(point_1_illium, point_2_illium, femoral_head_point_bottom, femoral_head_point_top, verbose=verbose, precise=precise)
 
 
 # each object of this type will be a set of scans and their corresponding masks
@@ -135,14 +150,19 @@ class ScanCollection:
                 else:
                     self.scans[num_list[0][0]].display()
 
-    def calculate_fhc(self, mask=MASK_PREDICTED, verbose=False, precise=False):
+    def calculate_fhc(self, mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False):
         error_log = ""
         incorrect_guess = 0
         for i in range(0, len(self.scan_numbers)):
             calc = self.scans[i].calculate_fhc(mask=mask, verbose=verbose, precise=precise)
-            oracle = check_oracle_fhc(self.scan_numbers[i], precise=precise)
-            if calc != oracle:
-                error_log += str(self.scan_numbers[i]) + " : " + str(calc) + " : " + str(oracle) + "\n"
+
+            if compare_to == MASK_GROUND_TRUTH:
+                true_fhc = self.scans[i].calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=verbose, precise=precise)
+            else:
+                true_fhc = check_oracle_fhc(self.scan_numbers[i], precise=precise)
+
+            if calc != true_fhc:
+                error_log += str(self.scan_numbers[i]) + " : " + str(calc) + " : " + str(true_fhc) + "\n"
                 incorrect_guess += 1
 
         correct_guess = len(self.scan_numbers) - incorrect_guess
