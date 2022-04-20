@@ -13,7 +13,8 @@ class TwoDNumpyImage(NumpyImage):
         if self.image_3d.ndim > 2:
             self.convert_from_numpy_image()
         self.image_3d = self.image_3d - np.amin(self.image_3d)
-        self.image_3d = self.image_3d * (255/np.amax(self.image_3d))
+        if np.amax(self.image_3d) != 0:
+            self.image_3d = self.image_3d * (255/np.amax(self.image_3d))
 
     def convert_from_numpy_image(self, numpy_image=None):
         # Convert each pixel into a greyscale value
