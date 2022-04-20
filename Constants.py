@@ -7,7 +7,7 @@ MASK_FILE = "../Alder_Hey_Ground_truths/"
 MODEL_FILE = "../Trained_Tensorflow_Models/"
 
 SAVED_MODEL = "Trained_Modelv2"
-SAVE_MODEL_AS = "Trained_Modelv3"
+SAVE_MODEL_AS = "Trained_Modelv6"
 # "Trained_Model" # trained on 30 examples 97.5% accuracy but produces 'fuzzy' edges
 # "Trained_Modelv2" # trained on 300 examples 98\% accuracy and produces 'human-like' edges
 
@@ -24,8 +24,9 @@ RGBA_TRANSLUCENT = [0, 0, 0, 10]
 POINT_SIZE = 5
 
 # Machine learning
-TRAINING_CROP_SHAPE = (435, 550)
+TRAINING_CROP_SHAPE = (470, 550)
 CROP_SHAPE = (384, 384)
+DOWN_SAMPLE_SHAPE = (3, 3)
 INPUT_SHAPE = (128, 128)
 
 # Augmentation
@@ -39,3 +40,7 @@ EPOCHS = 300
 # 10 epochs per min
 NUM_EPOCH_PRINT_CALLBACK = 30
 VAL_SUBSPLITS = 1
+
+
+#FHC
+FHC_ILLIUM_STEP = 10

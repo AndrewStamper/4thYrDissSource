@@ -1,7 +1,7 @@
 from Data.DataCollection import ScanCollection
 from Segmentation.Interface import ML
 from Constants import *
-from Experiments.DataSplits import *
+from Data.DataSplits import *
 
 
 def explore_reloading_models():
@@ -10,7 +10,7 @@ def explore_reloading_models():
 
     # crop data
     validation_data.crop(CROP_SHAPE)
-    validation_data.max_pool((3, 3))
+    validation_data.max_pool(DOWN_SAMPLE_SHAPE)
 
     # convert data into format for tensorflow
     validation_dataset = validation_data.load_data()

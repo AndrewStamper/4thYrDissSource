@@ -1,7 +1,7 @@
 from Data.DataCollection import ScanCollection
 from Segmentation.Interface import ML
 from Constants import *
-from Experiments.DataSplits import *
+from Data.DataSplits import *
 
 
 def explore_image_segmentation():
@@ -13,8 +13,8 @@ def explore_image_segmentation():
     # crop data
     training_data.crop(TRAINING_CROP_SHAPE)
     validation_data.crop(CROP_SHAPE)
-    training_data.max_pool((3, 3))
-    validation_data.max_pool((3, 3))
+    training_data.max_pool(DOWN_SAMPLE_SHAPE)
+    validation_data.max_pool(DOWN_SAMPLE_SHAPE)
 
     # convert data into format for tensorflow
     train_dataset = training_data.load_data()
