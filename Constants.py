@@ -6,6 +6,8 @@ IMAGE_FILE = "../Alder_Hey_Ultrasounds/"
 MASK_FILE = "../Alder_Hey_Ground_truths/"
 MODEL_FILE = "../Trained_Tensorflow_Models/"
 
+SEGMENTATION_RESULTS = "segmentation_results"
+
 SAVED_MODEL = "Trained_Modelv2"
 SAVE_MODEL_AS = "Trained_Modelv6"
 # "Trained_Model" # trained on 30 examples 97.5% accuracy but produces 'fuzzy' edges

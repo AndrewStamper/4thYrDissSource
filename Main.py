@@ -9,6 +9,7 @@ from Experiments.data_together import explore_image_segmentation
 from Experiments.loadingSavedModel import explore_reloading_models
 from Experiments.ExploreFHC import explore_FHC
 from Experiments.Unaceptable_analysis import unacceptable_analysis
+from Experiments.measurements import measure_scan
 
 scan_number = "A080L"
 
@@ -22,8 +23,10 @@ scan_number = "A080L"
 
 # explore_reloading_models()
 
-explore_FHC("A047L")
+# explore_FHC("A047L")
 
 # unacceptable_analysis()
+
+measure_scan()
 
 print("complete")
