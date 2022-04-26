@@ -1,6 +1,7 @@
 from ImageClasses.TwoDNumpyImage import TwoDNumpyImage
 from Constants import *
 import numpy as np
+from PIL import Image
 
 
 class AnnotationMaskScan(TwoDNumpyImage):
@@ -13,6 +14,12 @@ class AnnotationMaskScan(TwoDNumpyImage):
 
     def _read_image(self, filename, location=MASK_FILE):
         super()._read_image(filename, location)
+
+    def write_to_pbm(self, filename, location=OUTPUT_FILE):
+        pil_image = Image.fromarray((self.image_3d/255)==0)
+        with open(location+filename, 'w') as f:
+            f.write(f'P1\n{pil_image.width} {pil_image.height}\n')
+            np.savetxt(f, pil_image, fmt='%d')
 
 
 # collection of masks one for each structure for a given scan
@@ -70,5 +77,10 @@ class MaskCollection:
         l_b = other.labrum.convert_to_rgb(colour=RGBA_BLUE)
 
         return [(i_r+i_b).image_3d[:, :, 0:3], (f_r+f_b).image_3d[:, :, 0:3], (l_r+l_b).image_3d[:, :, 0:3]]
+
+    def write_to_pbm(self, filename, location=OUTPUT_FILE):
+        self.illium.write_to_pbm("I" + filename, location)
+        self.femoral_head.write_to_pbm("F" + filename, location)
+        self.labrum.write_to_pbm("L" + filename, location)
 
 

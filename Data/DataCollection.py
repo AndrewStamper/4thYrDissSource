@@ -5,7 +5,7 @@ from FHC.MaskToFemoralPoints import *
 from FHC.MaskToIlliumPoints import *
 from FHC.Oracle import check_oracle_fhc
 from FHC.Calculate import *
-from Constants import FHC_ILLIUM_STEP
+from Constants import FHC_ILLIUM_STEP, OUTPUT_FILE
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -95,6 +95,11 @@ class SingleScan:
 
         return fhc(point_1_illium, point_2_illium, femoral_head_point_bottom, femoral_head_point_top, verbose=verbose, precise=precise)
 
+    def write_mask_to_pbm(self, filename, location=OUTPUT_FILE):
+        if self.predicted_mask is not None:
+            self.predicted_mask.write_to_pbm("P" + filename, location)
+            self.ground_truth.write_to_pbm("G" + filename, location)
+
 
 # each object of this type will be a set of scans and their corresponding masks
 class ScanCollection:
@@ -105,7 +110,7 @@ class ScanCollection:
         self.scans = v_scans(self.scan_numbers)
 
     def number_of_scans(self):
-        return self.scans.shape(0)
+        return self.scans.shape[0]
 
     def get_scan(self, scan_number):
         if scan_number in self.scan_numbers:
