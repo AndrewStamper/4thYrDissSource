@@ -38,7 +38,7 @@ class AbhiAnnotationPointScan(NumpyImage):
         return self.points[illium_b_b]
 
     def _find_points(self):
-        points = np.repeat([[0, 0]], 5, axis=0)
+        points = np.repeat([[0.0, 0.0]], 5, axis=0)
 
         red_layer = self.image_3d[:, :, 0] > 245
         green_layer = self.image_3d[:, :, 1] > 245
@@ -60,6 +60,8 @@ class AbhiAnnotationPointScan(NumpyImage):
 
         points[illium_t_l] = (np.mean(l_red_pixels, axis=0))
         points[illium_t_r] = (np.mean(r_red_pixels, axis=0))
+        points[illium_t_l, 0] = (int(points[illium_t_l, 0] + points[illium_t_r, 0]))/2  # make the illium line always horizontal
+        points[illium_t_r, 0] = points[illium_t_l, 0]
         points[labrum] = (np.mean(green_pixels, axis=0))
         points[illium_b_t] = (np.mean(blue_pixels, axis=0))
         points[illium_b_b] = (np.mean(yellow_pixels, axis=0))
@@ -74,7 +76,7 @@ class AbhiAnnotationPointScan(NumpyImage):
             for y in range(-POINT_SIZE, POINT_SIZE):
                 for x in range(-POINT_SIZE, POINT_SIZE):
                     if((y * y) + (x * x) <= POINT_SIZE*POINT_SIZE) and ((self.points[index, 0] + y) >= 0) and ((self.points[index, 1] + x) >= 0):
-                        output_image[self.points[index, 0] + y, self.points[index, 1] + x] = colours[index]
+                        output_image[int(self.points[index, 0] + y), int(self.points[index, 1] + x)] = colours[index]
 
         return output_image[:, :, 0:3]
 
@@ -101,7 +103,7 @@ class AbhiAnnotationPointScan(NumpyImage):
         sy, sx = shape
         for i in range(0, len(self.points)):
             y, x = self.points[i]
-            self.points[i] = (int(y/sy), int(x/sx))
+            self.points[i] = ((y/sy), (x/sx))
 
         im_y, im_x = self.image_3d.shape[0:2]
         self.image_3d = np.zeros(shape=(int(im_y/sy), int(im_x/sx)))
