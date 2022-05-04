@@ -159,10 +159,10 @@ class ScanCollection:
         error_log = ""
         incorrect_guess = 0
         for i in range(0, len(self.scan_numbers)):
-            calc = self.scans[i].calculate_fhc(mask=mask, verbose=verbose, precise=precise)
+            calc = self.scans[i].calculate_fhc(mask=mask, illium=GENERATED_POINTS, verbose=verbose, precise=precise)
 
             if compare_to == MASK_GROUND_TRUTH:
-                true_fhc = self.scans[i].calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=verbose, precise=precise)
+                true_fhc = self.scans[i].calculate_fhc(mask=MASK_GROUND_TRUTH, illium=ANNOTATION_POINTS,  verbose=verbose, precise=precise)
             else:
                 true_fhc = check_oracle_fhc(self.scan_numbers[i], precise=precise)
 
