@@ -159,8 +159,14 @@ class ScanCollection:
         error_log = ""
         incorrect_guess = 0
         for i in range(0, len(self.scan_numbers)):
+            if verbose:
+                print(self.scan_numbers[i] + "-----------------------------------------------------------------------")
+                print("calculated:")
+
             calc = self.scans[i].calculate_fhc(mask=mask, illium=GENERATED_POINTS, verbose=verbose, precise=precise)
 
+            if verbose:
+                print("Truth:")
             if compare_to == MASK_GROUND_TRUTH:
                 true_fhc = self.scans[i].calculate_fhc(mask=MASK_GROUND_TRUTH, illium=ANNOTATION_POINTS,  verbose=verbose, precise=precise)
             else:
