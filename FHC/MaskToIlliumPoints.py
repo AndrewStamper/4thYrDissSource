@@ -1,21 +1,20 @@
 import numpy as np
 import math
+from Constants import FHC_FIXED_HORIZONTAL
 
 
-def illium_points(mask, step_size):
+def illium_points(mask, step_size, fixed_horizontal=FHC_FIXED_HORIZONTAL):
     upper = find_upper_with_stopping(mask, step_size)
 
-    print("--------------------------------------")
-    # if draw a straight horizontal line at that height
-    c = average_height(upper)
-    m = 0
-    print(str(m) + " : " + str(c))
+    if fixed_horizontal:
+        # if draw a straight horizontal line at that height
+        c = average_height(upper)
+        m = 0
+    else:
+        # if fit a line using least squares
+        mask_pixels = np.array(np.argwhere(upper == 255))
+        m, c = calculate_line(mask_pixels[:, 0], mask_pixels[:, 1])
 
-    # if fit a line using least squares
-    mask_pixels = np.array(np.argwhere(upper))
-    m_prime, c_prime = calculate_line(mask_pixels[0], mask_pixels[1])
-
-    print(str(m_prime) + " : " + str(c_prime))
     return (c, 0), (c+m, 1)
 
 
@@ -59,7 +58,6 @@ def find_upper_with_stopping(mask, step_size):
                 this_section_x = []
         elif x % step_size == 0 and x != 0 and len(top_so_far_y) > 2*step_size:
             break
-
 
     if len(top_so_far_x) > 5*step_size:
         end = 2*step_size
