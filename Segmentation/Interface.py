@@ -19,15 +19,15 @@ def display(display_list):
 
 
 class ML(tf.keras.layers.Layer):
-    def __init__(self):
+    def __init__(self, model_type=CONST.MODEL_TYPE):
         # setup the model itself
-        if CONST.MODEL_TYPE == MODEL_ORIGINAL_MODIFIED:
+        if model_type == MODEL_ORIGINAL_MODIFIED:
             self.model = unet_model(output_channels=CONST.OUTPUT_CLASSES)
-        elif CONST.MODEL_TYPE == MODEL_UNET:
-            self.model = unet_model(output_channels=CONST.OUTPUT_CLASSES)
-        elif CONST.MODEL_TYPE == MODEL_ENCODER_MOD_UNET:
+        elif model_type == MODEL_UNET:
+            self.model = unmodified_unet(output_channels=CONST.OUTPUT_CLASSES)
+        elif model_type == MODEL_ENCODER_MOD_UNET:
             self.model = encoder_modified_unet(output_channels=CONST.OUTPUT_CLASSES)
-        else:  # CONST.MODEL_TYPE == MODEL_ENCODER_DECODER_MODIFIED_UNET:
+        else:  # model_type== MODEL_ENCODER_DECODER_MODIFIED_UNET:
             self.model = encoder_decoder_modified_unet(output_channels=CONST.OUTPUT_CLASSES)
 
         self.model.compile(optimizer='adam',
@@ -122,14 +122,14 @@ class ML(tf.keras.layers.Layer):
     def load_model(self, filename, location=CONST.MODEL_FILE):
         self.model.load_weights(location + filename)
 
-    def show_epoch_progression(self):
+    def show_epoch_progression(self, model_name="MODEL", augmentation_name="AUGMENTATION"):
         loss = self.model_history.history['loss']
         val_loss = self.model_history.history['val_loss']
 
         plt.figure()
         plt.plot(self.model_history.epoch, loss, 'r', label='Training loss')
         plt.plot(self.model_history.epoch, val_loss, 'bo', label='Validation loss')
-        plt.title('Training and Validation Loss')
+        plt.title("Training and Validation Loss for " + model_name + " \n with " + augmentation_name + " augmentation")
         plt.xlabel('Epoch')
         plt.ylabel('Loss Value')
         plt.ylim([0, 1])
