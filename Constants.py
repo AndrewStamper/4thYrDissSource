@@ -8,10 +8,14 @@ MODEL_FILE = "../Trained_Tensorflow_Models/"
 
 SEGMENTATION_RESULTS = "segmentation_results"
 
-SAVED_MODEL = "Trained_Modelv2"
-SAVE_MODEL_AS = "Trained_Modelv6"
+SAVED_MODEL = "encoderdecoderv1"
+SAVE_MODEL_AS = "new"
 # "Trained_Model" # trained on 30 examples 97.5% accuracy but produces 'fuzzy' edges
 # "Trained_Modelv2" # trained on 300 examples 98\% accuracy and produces 'human-like' edges
+
+# "encoderonlyv1"  # encoder modified no class weights accuracy 97.19%
+# "encoderdecoderv1"  # encoder and decoder modified no class weights accuracy 97.46%
+# "Trained_Modelv2"  # originally modified example accuracy 97.12%
 
 # Colour constants
 RGB_TO_BRIGHTNESS = [0.21, 0.72, 0.07]
@@ -30,6 +34,12 @@ TRAINING_CROP_SHAPE = (470, 550)
 CROP_SHAPE = (384, 384)
 DOWN_SAMPLE_SHAPE = (3, 3)
 INPUT_SHAPE = (128, 128)
+
+MODEL_ORIGINAL_MODIFIED = 0
+MODEL_UNET = 1
+MODEL_ENCODER_MOD_UNET = 2
+MODEL_ENCODER_DECODER_MODIFIED_UNET = 3
+MODEL_TYPE = MODEL_ENCODER_DECODER_MODIFIED_UNET
 
 # Augmentation
 AUGMENTATION_TYPE = Aug.AUGMENTATION_TYPE_MEDIUM

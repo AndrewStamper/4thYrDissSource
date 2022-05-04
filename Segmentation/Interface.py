@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import Constants as CONST
 from IPython.display import clear_output
 from Segmentation.Augmentations.Augmentations import Augmenter, AUGMENTATION_TYPE_DEMO
-from Segmentation.Model import unet_model
+from Segmentation.Model import *
 
 
 def display(display_list):
@@ -21,7 +21,15 @@ def display(display_list):
 class ML(tf.keras.layers.Layer):
     def __init__(self):
         # setup the model itself
-        self.model = unet_model(output_channels=CONST.OUTPUT_CLASSES)
+        if CONST.MODEL_TYPE == MODEL_ORIGINAL_MODIFIED:
+            self.model = unet_model(output_channels=CONST.OUTPUT_CLASSES)
+        elif CONST.MODEL_TYPE == MODEL_UNET:
+            self.model = unet_model(output_channels=CONST.OUTPUT_CLASSES)
+        elif CONST.MODEL_TYPE == MODEL_ENCODER_MOD_UNET:
+            self.model = encoder_modified_unet(output_channels=CONST.OUTPUT_CLASSES)
+        else:  # CONST.MODEL_TYPE == MODEL_ENCODER_DECODER_MODIFIED_UNET:
+            self.model = encoder_decoder_modified_unet(output_channels=CONST.OUTPUT_CLASSES)
+
         self.model.compile(optimizer='adam',
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])

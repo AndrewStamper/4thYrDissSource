@@ -21,16 +21,18 @@ down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
 
 down_stack.trainable = True
 
-up_stack = [
-    pix2pix.upsample(512, 3),  # 4x4 -> 8x8
-    pix2pix.upsample(256, 3),  # 8x8 -> 16x16
-    pix2pix.upsample(128, 3),  # 16x16 -> 32x32
-    pix2pix.upsample(64, 3),   # 32x32 -> 64x64
-]
+initializer = tf.random_normal_initializer(0., 0.02)
 
 
-def unet_model(output_channels:int):
+def unet_model(output_channels:int):  # the originally modified model for my testing
     inputs = tf.keras.layers.Input(shape=input_shape)
+
+    up_stack = [
+        pix2pix.upsample(512, 3),  # 4x4 -> 8x8
+        pix2pix.upsample(256, 3),  # 8x8 -> 16x16
+        pix2pix.upsample(128, 3),  # 16x16 -> 32x32
+        pix2pix.upsample(64, 3),   # 32x32 -> 64x64
+    ]
 
     # Downsampling through the model
     skips = down_stack(inputs)
@@ -53,7 +55,121 @@ def unet_model(output_channels:int):
     return tf.keras.Model(inputs=inputs, outputs=x)
 
 
+def unet_upsample1(filters, size): # up sampler with one internal convolution
+    result = tf.keras.Sequential()
+    result.add(
+        tf.keras.layers.Conv2D(filters, size,
+                               padding='same',
+                               kernel_initializer=initializer,
+                               use_bias=False))
+    result.add(tf.keras.layers.BatchNormalization())
+    result.add(tf.keras.layers.ReLU())
 
+    result.add(
+        tf.keras.layers.Conv2DTranspose(filters, size, strides=2,
+                                        padding='same',
+                                        kernel_initializer=initializer,
+                                        use_bias=False))
+    return result
+
+
+def unet_upsample2(filters, size):  # up sampler with two internal convolutions
+    result = tf.keras.Sequential()
+    result.add(
+        tf.keras.layers.Conv2D(filters, size,
+                               padding='same',
+                               kernel_initializer=initializer,
+                               use_bias=False))
+    result.add(tf.keras.layers.BatchNormalization())
+    result.add(tf.keras.layers.ReLU())
+
+    result.add(unet_upsample1(filters, size))
+    return result
+
+
+def encoder_modified_unet(output_channels):
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    concat = tf.keras.layers.Concatenate()
+
+    top_skip = tf.keras.layers.Conv2D(32, 3,
+                                      padding='same',
+                                      kernel_initializer=initializer,
+                                      use_bias=False)(inputs)
+
+    # Downsampling through the model
+    skips = down_stack(inputs)
+    x = skips[-1]
+    skips = reversed(skips[:-1])
+
+    up_stack = [
+        unet_upsample1(512, 3),  # 4x4 -> 8x8
+        unet_upsample1(256, 3),  # 8x8 -> 16x16
+        unet_upsample1(128, 3),  # 16x16 -> 32x32
+        unet_upsample1(64, 3),   # 32x32 -> 64x64
+    ]
+
+    # Upsampling and establishing the skip connections
+    for up, skip in zip(up_stack, skips):
+        x = up(x)
+        x = concat([x, skip])
+
+    last_upsample = unet_upsample1(32, 3)  # 64x64 -> 128x128
+    x = last_upsample(x)
+
+    # This is the last layer of the model
+    x = concat([x, top_skip])
+    x = tf.keras.layers.Conv2D(32, 3,
+                               padding='same',
+                               kernel_initializer=initializer,
+                               use_bias=False)(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.ReLU()(x)
+
+    x = tf.keras.layers.Conv2D(output_channels, 3,
+                               padding='same',
+                               kernel_initializer=initializer,
+                               use_bias=False)(x)
+
+    return tf.keras.Model(inputs=inputs, outputs=x)
+
+
+def encoder_decoder_modified_unet(output_channels):
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    concat = tf.keras.layers.Concatenate()
+
+    top_skip = tf.keras.layers.Conv2D(32, 3,
+                                      padding='same',
+                                      kernel_initializer=initializer,
+                                      use_bias=False)(inputs)
+
+    # Downsampling through the model
+    skips = down_stack(inputs)
+    x = skips[-1]
+    skips = reversed(skips[:-1])
+
+    up_stack = [
+        pix2pix.upsample(512, 3),  # 4x4 -> 8x8
+        pix2pix.upsample(256, 3),  # 8x8 -> 16x16
+        pix2pix.upsample(128, 3),  # 16x16 -> 32x32
+        pix2pix.upsample(64, 3),   # 32x32 -> 64x64
+    ]
+
+    # Upsampling and establishing the skip connections
+    for up, skip in zip(up_stack, skips):
+        x = up(x)
+        x = concat([x, skip])
+
+    last_upsample = pix2pix.upsample(32, 3)  # 64x64 -> 128x128
+    x = last_upsample(x)
+
+    # This is the last layer of the model
+    x = concat([x, top_skip])
+
+    x = tf.keras.layers.Conv2D(output_channels, 3,
+                               padding='same',
+                               kernel_initializer=initializer,
+                               use_bias=False)(x)
+    return tf.keras.Model(inputs=inputs, outputs=x)
 
 
 def testunit(inputs, filters = 3):
