@@ -4,8 +4,18 @@ import math
 
 def illium_points(mask, step_size):
     upper = find_upper_with_stopping(mask, step_size)
+
+    print("--------------------------------------")
+    # if draw a straight horizontal line at that height
+    c = average_height(upper)
+    m = 0
+    print(str(m) + " : " + str(c))
+
+    # if fit a line using least squares
     mask_pixels = np.array(np.argwhere(upper))
-    m, c = calculate_line(mask_pixels[0], mask_pixels[1])
+    m_prime, c_prime = calculate_line(mask_pixels[0], mask_pixels[1])
+
+    print(str(m_prime) + " : " + str(c_prime))
     return (c, 0), (c+m, 1)
 
 
