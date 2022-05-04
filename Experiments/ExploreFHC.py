@@ -1,4 +1,4 @@
-from Data.DataCollection import SingleScan, ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED, DDH_ORACLE
+from Data.DataCollection import SingleScan, ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED, DDH_ORACLE, ANNOTATION_POINTS, GENERATED_POINTS
 from FHC.Oracle import check_oracle_fhc
 from Segmentation.Interface import ML
 from Constants import *
@@ -6,14 +6,8 @@ from Data.DataSplits import *
 
 
 def explore_FHC(scan_number):
-    print(scan_number)
-    scan = SingleScan(scan_number)
-    calc = scan.calculate_fhc(mask=MASK_GROUND_TRUTH, verbose=True, precise=False)
-    oracle = check_oracle_fhc(scan_number, precise=False)
-    print("calculated: " + str(calc) + " oracle: " + str(oracle))
-
     # load data into my format
-    validation_data = ScanCollection(validation_data_list())
+    validation_data = ScanCollection(validation_data_list())  # validation_data_list training_data_list() + validation_data_list() test_data_list
 
     # crop data
     validation_data.crop(CROP_SHAPE)
@@ -34,7 +28,21 @@ def explore_FHC(scan_number):
     validation_data.make_predictions(new_ml)
 
     print("FHC using predicted masks")
-    validation_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)  # DDH_ORACLE
+    validation_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)  # DDH_ORACLE MASK_GROUND_TRUTH
 
-    validation_data.display()# ["A072R", "A079L", "A045R"]
+    #
+    # #ALL WRONG PREDCITIONS
+    # wrong_list = ["A051R", "A045R", "A074L", "A047L", "A065R"]
+    # data = ScanCollection(wrong_list)
+    #
+    # # crop data
+    # data.crop(CROP_SHAPE)
+    # data.max_pool(DOWN_SAMPLE_SHAPE)
+    #
+    # # make predictions and calculate FHC
+    # data.make_predictions(new_ml)
+    #
+    # print("FHC using predicted masks")
+    # data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=True, precise=False)
+    # data.display()
 
