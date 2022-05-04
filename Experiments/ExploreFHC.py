@@ -1,4 +1,4 @@
-from Data.DataCollection import SingleScan, ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED
+from Data.DataCollection import SingleScan, ScanCollection, MASK_GROUND_TRUTH, MASK_PREDICTED, DDH_ORACLE
 from FHC.Oracle import check_oracle_fhc
 from Segmentation.Interface import ML
 from Constants import *
@@ -34,7 +34,7 @@ def explore_FHC(scan_number):
     validation_data.make_predictions(new_ml)
 
     print("FHC using predicted masks")
-    validation_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)
+    validation_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)  # DDH_ORACLE
 
     validation_data.display()# ["A072R", "A079L", "A045R"]
 
