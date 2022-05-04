@@ -13,7 +13,7 @@ class Augmenter(tf.keras.layers.Layer):
         self.seed = seed
         ia.seed(self.seed)
         if augmentations == AUGMENTATION_TYPE_NONE:
-            self.seq = lambda x, y: (x, y)
+            self.seq = lambda image, segmentation_maps: (image, segmentation_maps)
         elif augmentations == AUGMENTATION_TYPE_BASIC:
             self.seq = iaa.Sequential([
                 iaa.Multiply((0.5, 1.5)),
