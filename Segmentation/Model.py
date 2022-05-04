@@ -55,10 +55,23 @@ def unet_model(output_channels:int):  # the originally modified model for my tes
     return tf.keras.Model(inputs=inputs, outputs=x)
 
 
-def unet_upsample1(filters, size): # up sampler with one internal convolution
+def unet_encoder_module1(filters, size):
     result = tf.keras.Sequential()
     result.add(
         tf.keras.layers.Conv2D(filters, size,
+                               padding='same',
+                               kernel_initializer=initializer,
+                               use_bias=False))
+    result.add(tf.keras.layers.BatchNormalization())
+    result.add(tf.keras.layers.ReLU())
+    return result
+
+
+def unet_upsample1(filters, size): # up sampler with one internal convolution
+    filters = min(filters, 512)
+    result = tf.keras.Sequential()
+    result.add(
+        tf.keras.layers.Conv2D(min(filters*2, 512), size,
                                padding='same',
                                kernel_initializer=initializer,
                                use_bias=False))
@@ -73,18 +86,36 @@ def unet_upsample1(filters, size): # up sampler with one internal convolution
     return result
 
 
-def unet_upsample2(filters, size):  # up sampler with two internal convolutions
-    result = tf.keras.Sequential()
-    result.add(
-        tf.keras.layers.Conv2D(filters, size,
-                               padding='same',
-                               kernel_initializer=initializer,
-                               use_bias=False))
-    result.add(tf.keras.layers.BatchNormalization())
-    result.add(tf.keras.layers.ReLU())
+def unmodified_unet(output_channels):
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    concat = tf.keras.layers.Concatenate()
+    pool = tf.keras.layers.MaxPool2D(pool_size=2)
 
-    result.add(unet_upsample1(filters, size))
-    return result
+    x1 = unet_encoder_module1(32, 3)(inputs)  # 128 layer
+    x2 = unet_encoder_module1(64, 3)(pool(x1))  # 64 layer
+    x3 = unet_encoder_module1(128, 3)(pool(x2))  # 32 layer
+    x4 = unet_encoder_module1(256, 3)(pool(x3))  # 16 layer
+    x5 = unet_encoder_module1(512, 3)(pool(x4))  # 8 layer
+    x6 = unet_encoder_module1(512, 3)(pool(x5))  # 4 layer
+
+    y5 = tf.keras.layers.Conv2DTranspose(512, 3, strides=2,
+                                         padding='same',
+                                         kernel_initializer=initializer,
+                                         use_bias=False)(x6)  # 4->8
+
+    # num filters passed is the return dimensionality (i.e. num after the upsample), internally ahs double as many
+    y4 = unet_upsample1(256, 3)(concat([y5, x5]))  # 8->16
+    y3 = unet_upsample1(128, 3)(concat([y4, x4]))  # 16->32
+    y2 = unet_upsample1(64, 3)(concat([y3, x3]))  # 32->64
+    y1 = unet_upsample1(32, 3)(concat([y2, x2]))  # 64->128
+
+    done = unet_encoder_module1(32, 3)(concat([y1, x1]))
+
+    last = tf.keras.layers.Conv2D(
+        filters=output_channels, kernel_size=3,
+        padding='same')(done)
+
+    return tf.keras.Model(inputs=inputs, outputs=last)
 
 
 def encoder_modified_unet(output_channels):
