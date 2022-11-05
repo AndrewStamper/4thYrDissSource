@@ -30,6 +30,8 @@ def explore_FHC(scan_number):
     print("FHC using predicted masks")
     validation_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)  # DDH_ORACLE MASK_GROUND_TRUTH
 
+    # validation_data.display(["A082R", "A084R", "A088R", "A092R", "A094R", "A100L", "A086R", "A099L"])
+
     #
     # #ALL WRONG PREDCITIONS
     # wrong_list = ["A051R", "A045R", "A074L", "A047L", "A065R"]

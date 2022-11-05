@@ -11,9 +11,9 @@ def visualise_mask(scan_number):
 
     mask_collection = MaskCollection(scan_number)
 
-    illium = mask_collection.illium.convert_to_rgb(colour=RGBA_RED)
-    femoral_head = mask_collection.femoral_head.convert_to_rgb(colour=RGBA_BLUE)
-    labrum = mask_collection.labrum.convert_to_rgb(colour=RGBA_GREEN)
+    illium = mask_collection.illium.convert_to_rgba(colour=RGBA_RED)
+    femoral_head = mask_collection.femoral_head.convert_to_rgba(colour=RGBA_BLUE)
+    labrum = mask_collection.labrum.convert_to_rgba(colour=RGBA_GREEN)
 
     i_f_l = illium + femoral_head + labrum
 

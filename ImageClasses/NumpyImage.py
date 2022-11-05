@@ -64,6 +64,9 @@ class NumpyImage:
         cropped_image = self.restrict_to_box(corner_top_left, corner_bottom_right).image_3d
         self.image_3d = np.pad(cropped_image, padding, 'constant')
 
+    def remove_rightmost(self, x):
+        self.image_3d = self.image_3d[:, :-x]
+
     # print it
     def write_image(self, filename, image=None):
         if image is None:
@@ -80,6 +83,11 @@ class NumpyImage:
         pil_image = Image.fromarray(self.image_3d)
         pil_image.save(file)
         file.close()
+
+    def rgba_to_rgb(self):
+        assert(self.image_3d.shape[2] == 4)
+        newimage = self.image_3d[:, :, 0:3]
+        return NumpyImage(newimage)
 
     def __add__(self, other):
         if self.get_shape() != other.get_shape():

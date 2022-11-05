@@ -23,6 +23,26 @@ def average_height(array):
     return np.average(mask_pixels)
 
 
+def find_upper(mask):
+    illium_mask = mask.illium.image_3d
+    shape = illium_mask.shape
+    output = np.zeros((*shape, 1))
+    top_so_far_y = []
+    top_so_far_x = []
+    for x in range(0, shape[1]):
+        for y in range(1, shape[0]):
+            if illium_mask[y, x] > 0 and illium_mask[y-1, x] == 0:
+                top_so_far_y.append(y)
+                top_so_far_x.append(x)
+
+    index = 0
+    while index < len(top_so_far_x):
+        output[top_so_far_y[index], top_so_far_x[index], 0] = 255
+        index = index+1
+
+    return output
+
+
 def find_upper_with_stopping(mask, step_size):
     illium_mask = mask.illium.image_3d
     shape = illium_mask.shape
@@ -48,8 +68,8 @@ def find_upper_with_stopping(mask, step_size):
                 m_so_far, c_so_far = calculate_line(top_so_far_y[-3*step_size:], top_so_far_x[-3*step_size:])
                 m_section, c_section = calculate_line(this_section_y, this_section_x)
                 angle = compare_lines(m_so_far, m_section)
-                if abs(angle) > max_angle:
-                    max_angle = abs(angle)
+                if angle < max_angle:
+                    max_angle = angle
                     max_angle_x = x
 
                 top_so_far_y = top_so_far_y + this_section_y

@@ -27,15 +27,24 @@ class TwoDNumpyImage(NumpyImage):
 
     # write back to a png
     def write_image(self, filename, colour=None):
-        numpy_image = self.convert_to_rgb(colour)
+        numpy_image = self.convert_to_rgba(colour)
         numpy_image.write_image(filename)
+
+    # convert to RGBA
+    def convert_to_rgba(self, colour=None):
+        if colour is None:
+            return NumpyImage(np.repeat(self.image_3d.reshape((self.get_height(), self.get_width(), 1)), 3, axis=2))
+        else:
+            new_image_3d = np.zeros((*self.image_3d.shape, 4))
+            new_image_3d[self.image_3d > 0] = colour
+            return NumpyImage(new_image_3d)
 
     # convert to RGB
     def convert_to_rgb(self, colour=None):
         if colour is None:
             return NumpyImage(np.repeat(self.image_3d.reshape((self.get_height(), self.get_width(), 1)), 3, axis=2))
         else:
-            new_image_3d = np.zeros((*self.image_3d.shape, 4))
+            new_image_3d = np.zeros((*self.image_3d.shape, 3))
             new_image_3d[self.image_3d > 0] = colour
             return NumpyImage(new_image_3d)
 

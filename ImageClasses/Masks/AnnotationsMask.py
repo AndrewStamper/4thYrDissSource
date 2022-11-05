@@ -37,10 +37,15 @@ class MaskCollection:
         self.femoral_head.crop(shape)
         self.labrum.crop(shape)
 
+    def remove_rightmost(self, x):
+        self.illium.remove_rightmost(x)
+        self.femoral_head.remove_rightmost(x)
+        self.labrum.remove_rightmost(x)
+
     def as_RGBA(self):
-        i = self.illium.convert_to_rgb(colour=RGBA_RED)
-        l = self.labrum.convert_to_rgb(colour=RGBA_GREEN)
-        f_h = self.femoral_head.convert_to_rgb(colour=RGBA_BLUE)
+        i = self.illium.convert_to_rgba(colour=RGBA_RED)
+        l = self.labrum.convert_to_rgba(colour=RGBA_GREEN)
+        f_h = self.femoral_head.convert_to_rgba(colour=RGBA_BLUE)
         return i + f_h + l
 
     def as_RGB(self):
@@ -68,21 +73,16 @@ class MaskCollection:
 
     def _difference_mask(self, this, other):
         # green is agreed, red is missed blue is miss predict
-        agreed = this.convert_to_rgb(colour=RGBA_GREEN).image_3d * np.tile(np.logical_and(this.image_3d > 120, other.image_3d > 120)[:, :, np.newaxis], (1, 1, 4))
-        false_neg = this.convert_to_rgb(colour=RGBA_RED).image_3d * np.tile(np.logical_and(this.image_3d > 120, other.image_3d <= 120)[:, :, np.newaxis], (1, 1, 4))
-        false_pos = other.convert_to_rgb(colour=RGBA_BLUE).image_3d * np.tile(np.logical_and(this.image_3d <= 120, other.image_3d > 120)[:, :, np.newaxis], (1, 1, 4))
-
+        agreed = this.convert_to_rgba(colour=RGBA_GREEN).image_3d * np.tile(np.logical_and(this.image_3d > 120, other.image_3d > 120)[:, :, np.newaxis], (1, 1, 4))
+        false_neg = this.convert_to_rgba(colour=RGBA_RED).image_3d * np.tile(np.logical_and(this.image_3d > 120, other.image_3d <= 120)[:, :, np.newaxis], (1, 1, 4))
+        false_pos = other.convert_to_rgba(colour=RGBA_BLUE).image_3d * np.tile(np.logical_and(this.image_3d <= 120, other.image_3d > 120)[:, :, np.newaxis], (1, 1, 4))
         diff_mask = (agreed + false_neg + false_pos)
-
         return diff_mask
 
     def difference_masks(self, other):
         illium = self._difference_mask(self.illium, other.illium)
-
         femoral_head = self._difference_mask(self.femoral_head, other.femoral_head)
-
         labrum = self._difference_mask(self.labrum, other.labrum)
-
         return [illium[:, :, 0:3], femoral_head[:, :, 0:3], labrum[:, :, 0:3]]
 
     def write_to_pbm(self, filename, location=OUTPUT_FILE):

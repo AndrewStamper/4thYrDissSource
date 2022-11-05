@@ -4,6 +4,7 @@ This is the main API which calls all subsequent actions
 
 from Experiments.AnalyseScan import analyse_scan
 from Experiments.ExploreFiltering import explore_filtering
+from Experiments.FHCdiagrams import printFHCdiagrams, printISBIdiagrams
 from Experiments.Visualise_mask import visualise_mask
 from Experiments.data_together import explore_image_segmentation
 from Experiments.loadingSavedModel import explore_reloading_models
@@ -13,8 +14,9 @@ from Experiments.measurements import measure_scan
 from Experiments.Show_augmentations import show_augmentations
 from Constants import *
 from Experiments.make_many_models import train_all_models
+from Experiments.FHC_measurements import fhc_all_models
 
-# scan_number = "A001R"
+scan_number = "A089R"
 
 # analyse_scan(scan_number)
 
@@ -34,7 +36,12 @@ from Experiments.make_many_models import train_all_models
 
 # show_augmentations("A099R")
 
-train_all_models()  # creates trains and saves all required models
+# train_all_models()  # creates trains and saves all required models
 
+fhc_all_models()
+
+# printFHCdiagrams(scan_number)
+
+# printISBIdiagrams(scan_number) # ISBI FIG2:scan_number="A089R"
 
 print("complete")

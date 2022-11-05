@@ -43,6 +43,9 @@ class ML(tf.keras.layers.Layer):
         self.data_pipeline_training_configured = False
         self.data_pipeline_validation_configured = False
 
+        self.best_loss = 100
+        self.best_trained_for = 0
+
     def configure_training_data_pipeline(self, train_images, augmentations_type=AUGMENTATION_TYPE_DEMO, augmentations_seed=CONST.AUGMENTATION_SEED):
         self.data_pipeline_training_configured = True
         self.train_num_examples = len(train_images)
@@ -60,7 +63,7 @@ class ML(tf.keras.layers.Layer):
 
     def configure_validation_data_pipeline(self, validation_images):
         self.validation_num_examples = len(validation_images)
-        self.validation_batches = validation_images.batch(CONST.BATCH_SIZE)
+        self.validation_batches = validation_images.batch(1)
         self.data_pipeline_validation_configured = True
 
     def verbose(self):
@@ -85,7 +88,7 @@ class ML(tf.keras.layers.Layer):
         else:
             display([self.sample_image, self.sample_mask])
 
-    def train(self):
+    def train(self, epochs=CONST.EPOCHS, callback=CONST.NUM_EPOCH_PRINT_CALLBACK, early_stop=False, filename=""):
         if not(self.data_pipeline_validation_configured and self.data_pipeline_training_configured):
             print("Error; data pipeline is not configured for training")
         else:
@@ -93,14 +96,22 @@ class ML(tf.keras.layers.Layer):
                 @staticmethod
                 def on_epoch_end(epoch, logs=None):
                     clear_output(wait=True)
-                    if (epoch + 1) % CONST.NUM_EPOCH_PRINT_CALLBACK == 0:
-                        print('\nSample Prediction after epoch {}\n'.format(epoch+1))
-                        self.display_example(predictions=True, train_data=True, num=1)
+                    if (epoch + 1) % callback == 0:
+                        # print('\nSample Prediction after epoch {}'.format(epoch+1))
+                        # self.display_example(predictions=True, train_data=True, num=1)
+
+                        if early_stop:
+                            loss, acc = self.model.evaluate(self.validation_batches, batch_size=1, verbose=2)
+                            if loss < self.best_loss:
+                                self.best_loss = loss
+                                self.best_trained_for = epoch
+                                print("-------------------------------------------------------saving early stopping")
+                                self.save_model(filename=filename + "_EARLY_STOP")
 
             steps_per_epoch = self.train_num_examples // CONST.BATCH_SIZE
             validation_steps = self.validation_num_examples // CONST.BATCH_SIZE//CONST.VAL_SUBSPLITS
 
-            self.model_history = self.model.fit(self.train_batches, epochs=CONST.EPOCHS,
+            self.model_history = self.model.fit(self.train_batches, epochs=epochs,
                                                 steps_per_epoch=steps_per_epoch,
                                                 validation_steps=validation_steps,
                                                 validation_data=self.validation_batches,
@@ -110,7 +121,7 @@ class ML(tf.keras.layers.Layer):
         if not self.data_pipeline_validation_configured:
             print("Error; data pipeline is not configured for evaluation")
         else:
-            loss, acc = self.model.evaluate(self.validation_batches, batch_size=CONST.BATCH_SIZE, verbose=2)
+            loss, acc = self.model.evaluate(self.validation_batches, batch_size=1, verbose=2)
             print("accuracy: {:5.2f}%".format(100 * acc))
 
     def make_prediction(self, image):

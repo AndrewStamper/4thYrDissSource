@@ -60,8 +60,10 @@ class AbhiAnnotationPointScan(NumpyImage):
 
         points[illium_t_l] = (np.mean(l_red_pixels, axis=0))
         points[illium_t_r] = (np.mean(r_red_pixels, axis=0))
-        points[illium_t_l, 0] = (int(points[illium_t_l, 0] + points[illium_t_r, 0]))/2  # make the illium line always horizontal
-        points[illium_t_r, 0] = points[illium_t_l, 0]
+        if STRAIGHTEN_ANNOTATION_FHC:
+            # make the illium line always horizontal
+            points[illium_t_l, 0] = (int(points[illium_t_l, 0] + points[illium_t_r, 0]))/2
+            points[illium_t_r, 0] = points[illium_t_l, 0]
         points[labrum] = (np.mean(green_pixels, axis=0))
         points[illium_b_t] = (np.mean(blue_pixels, axis=0))
         points[illium_b_b] = (np.mean(yellow_pixels, axis=0))

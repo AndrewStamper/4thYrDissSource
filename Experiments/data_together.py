@@ -30,4 +30,4 @@ def explore_image_segmentation():
     ml.display_example(predictions=True, train_data=False, num=BATCH_SIZE)
 
     # save the model for re-use later
-    ml.save_model(filename=SAVE_MODEL_AS)
+    # ml.save_model(filename=SAVE_MODEL_AS)

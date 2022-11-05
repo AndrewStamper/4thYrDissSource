@@ -20,6 +20,8 @@ def explore_reloading_models():
     new_ml.configure_validation_data_pipeline(validation_dataset)
     new_ml.load_model(filename=SAVED_MODEL)
 
+    new_ml.verbose()
+
     # check it has been loaded correctly
     new_ml.evaluate_model()
 

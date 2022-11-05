@@ -50,7 +50,6 @@ def validation_data_list():
     for number in scan_numbers:
         validation_scan_numbers.append(num_to_filename(number))
 
-    np.random.shuffle(validation_scan_numbers)
     return validation_scan_numbers
 
 
@@ -63,7 +62,6 @@ def test_data_list():
     for number in scan_numbers:
         test_scan_numbers.append(num_to_filename(number))
 
-    np.random.shuffle(test_scan_numbers)
     return test_scan_numbers
 
 
@@ -74,5 +72,4 @@ def unnaceptable_data_list():
     for number in scan_numbers:
         unnac_scan_numbers.append(num_to_filename(number))
 
-    np.random.shuffle(unnac_scan_numbers)
     return unnac_scan_numbers
