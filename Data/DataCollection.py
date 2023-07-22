@@ -261,6 +261,17 @@ class ScanCollection:
         print(error_log)
         return [correct_guess/(incorrect_guess + correct_guess), tp/(tp+fn), tn/(tn+fp)]
 
+    def calculate_fhc_csv(self):
+        output = "scan, calculated, true, \n"
+
+        for i in range(0, len(self.scan_numbers)):
+            calculated = self.scans[i].calculate_fhc_percent(mask=MASK_PREDICTED, illium=GENERATED_POINTS, verbose=False)* 100
+            truth = self.scans[i].calculate_fhc_percent(mask=MASK_GROUND_TRUTH, illium=ANNOTATION_POINTS, verbose=False)* 100
+            triple = self.scan_numbers[i] + ", " + str(calculated) + ", " + str(truth) + "\n"
+            output = output + triple
+
+        print(output)
+
     def calculate_fhc_scatter(self, verbose=False):
         correct_calculated_fhc_list = []
         correct_ground_truth_fhc_list = []

@@ -54,7 +54,9 @@ def fhc_all_models():
         output[i + 1, 0] = model_name
         results = testing_data.calculate_fhc(mask=MASK_PREDICTED, compare_to=MASK_GROUND_TRUTH, verbose=False, precise=False)  # DDH_ORACLE MASK_GROUND_TRUTH
         results = np.array(np.around(results, decimals=3), dtype=str)
-        testing_data.calculate_fhc_scatter(verbose=False)
+
+        # testing_data.calculate_fhc_scatter(verbose=False)
+        testing_data.calculate_fhc_csv()
         # testing_data.calculate_roc(verbose=False)
         # testing_data.calculate_fhc_diagnosis_comparison(verbose=False, precise=False)
 
